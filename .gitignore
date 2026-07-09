@@ -1,0 +1,30 @@
+# Virtual Environment
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated data
+data/interim/
+data/processed/
+data/predictions/
+
+# Trained models
+models/*.pkl
+models/*.joblib
+
+# Logs
+*.log
