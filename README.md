@@ -10,11 +10,11 @@
 
 ---
 
-## 📌 Project Overview
+# 📌 Project Overview
 
 This project aims to build a machine learning system capable of:
 
-- Predicting the outcome of international football matches.
+- Predicting international football match outcomes.
 - Estimating match win/draw/loss probabilities.
 - Simulating an entire FIFA World Cup tournament.
 - Calculating each team's probability of becoming World Cup Champion.
@@ -23,11 +23,12 @@ Instead of directly predicting the tournament winner, the model predicts **indiv
 
 ---
 
-## 🎯 Objectives
+# 🎯 Objectives
 
 - Collect historical international football data.
-- Merge multiple football datasets.
-- Perform data cleaning and preprocessing.
+- Organize multiple football datasets.
+- Perform exploratory data analysis (EDA).
+- Clean and preprocess datasets.
 - Engineer meaningful football features.
 - Train and compare multiple ML models.
 - Simulate the FIFA World Cup.
@@ -35,41 +36,123 @@ Instead of directly predicting the tournament winner, the model predicts **indiv
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
 ```text
 FIFA-WorldCup-Predictor/
 │
+├── app/
+│
 ├── data/
 │   ├── raw/
+│   │   ├── international_results/
+│   │   ├── elo_ratings/
+│   │   ├── fifa_rankings/
+│   │   └── match_features/
+│   │
 │   ├── interim/
 │   ├── processed/
 │   └── predictions/
 │
-├── notebooks/
-├── src/
 ├── models/
+│
+├── notebooks/
+│   └── 01_dataset_exploration.ipynb
+│
 ├── reports/
-├── app/
+│
+├── src/
+│   └── data/
+│       ├── load_data.py
+│       ├── clean_results.py
+│       ├── clean_rankings.py
+│       ├── clean_elo.py
+│       ├── clean_match_features.py
+│       └── merge_data.py
+│
 ├── tests/
 │
+├── .gitignore
+├── LICENSE
 ├── README.md
-├── requirements.txt
-└── .gitignore
+└── requirements.txt
 ```
 
 ---
 
 # 📊 Datasets
 
-This project combines multiple football datasets:
+This project combines multiple football datasets.
 
 | Dataset | Purpose |
 |----------|----------|
-| International Results | Historical match results |
-| FIFA Rankings | Team rankings |
-| Elo Ratings | Team strength |
-| Match Features | Additional engineered statistics |
+| International Results | Historical international match results |
+| FIFA Rankings | Official FIFA rankings |
+| Elo Ratings | Team strength ratings |
+| Match Features | Team and player feature datasets |
+
+Current raw datasets include:
+
+- results.csv
+- goalscorers.csv
+- shootouts.csv
+- former_names.csv
+- eloratings.csv
+- fifa_ranking.csv
+- fifa_matches.csv
+- fifa_teams.csv
+- player_aggregates.csv
+- teams_form.csv
+- teams_match_features.csv
+
+---
+
+# 📊 Exploratory Data Analysis (Completed)
+
+The initial EDA has been completed for all datasets.
+
+The exploration includes:
+
+- Dataset dimensions
+- Column inspection
+- Data types
+- Missing value analysis
+- Duplicate detection
+- Statistical summaries
+- Team distribution
+- Tournament distribution
+- Date range analysis
+
+This analysis provides the foundation for the upcoming data cleaning pipeline.
+
+---
+
+# ⚙️ Current Data Pipeline
+
+```
+Raw Datasets
+      │
+      ▼
+Load Data
+      │
+      ▼
+Exploratory Data Analysis ✅
+      │
+      ▼
+Data Cleaning 🚧
+      │
+      ▼
+Dataset Merging
+      │
+      ▼
+Feature Engineering
+      │
+      ▼
+Model Training
+      │
+      ▼
+World Cup Simulation
+```
 
 ---
 
@@ -108,22 +191,33 @@ World Cup Winner Probabilities
 
 ---
 
-# ⚙️ Models
+# 🛠️ Current Progress
 
-The following models will be implemented and compared.
+## ✅ Completed
 
-- Logistic Regression
-- Decision Tree
-- Random Forest
-- XGBoost
-- LightGBM
-- CatBoost
+- Project structure created
+- Raw datasets organized
+- Data loading module implemented
+- Data preprocessing module structure created
+- Exploratory Data Analysis completed
+- GitHub project initialized
 
-The best-performing model will be selected based on evaluation metrics.
+## 🚧 In Progress
+
+- Data cleaning
+- Data validation
+
+## ⏳ Upcoming
+
+- Dataset merging
+- Feature engineering
+- Model training
+- Tournament simulation
+- Web application
 
 ---
 
-# 📈 Features
+# 📈 Planned Features
 
 Examples of engineered features:
 
@@ -139,7 +233,22 @@ Examples of engineered features:
 
 ---
 
-# 📊 Evaluation Metrics
+# 🤖 Planned Machine Learning Models
+
+The following models will be implemented and compared.
+
+- Logistic Regression
+- Decision Tree
+- Random Forest
+- XGBoost
+- LightGBM
+- CatBoost
+
+The best-performing model will be selected based on evaluation metrics.
+
+---
+
+# 📊 Planned Evaluation Metrics
 
 - Accuracy
 - Precision
@@ -150,12 +259,12 @@ Examples of engineered features:
 
 ---
 
-# 🌍 World Cup Simulation
+# 🌍 Planned World Cup Simulation
 
 After training the best model:
 
 - Predict every tournament match.
-- Simulate the World Cup thousands of times.
+- Simulate the FIFA World Cup thousands of times.
 - Estimate each team's probability of becoming champion.
 
 ---
@@ -171,39 +280,52 @@ After training the best model:
 - LightGBM
 - CatBoost
 - Jupyter Notebook
-- Git & GitHub
+- Git
+- GitHub
 
 ---
 
 # 📅 Development Roadmap
 
-## Phase 1
+## Phase 1 – Project Initialization
 - [x] Project structure
 - [x] Dataset collection
-- [ ] Data exploration
+- [x] Raw dataset organization
+- [x] Data loading module
 
-## Phase 2
+## Phase 2 – Data Understanding
+- [x] Exploratory Data Analysis (EDA)
 - [ ] Data cleaning
-- [ ] Data preprocessing
+- [ ] Data validation
 
-## Phase 3
+## Phase 3 – Data Engineering
 - [ ] Dataset merging
 - [ ] Feature engineering
+- [ ] Processed dataset creation
 
-## Phase 4
+## Phase 4 – Machine Learning
+- [ ] Train/Test split
 - [ ] Baseline model
+- [ ] Model evaluation
 
-## Phase 5
-- [ ] Advanced ML models
+## Phase 5 – Advanced Models
+- [ ] Random Forest
+- [ ] XGBoost
+- [ ] LightGBM
+- [ ] CatBoost
 
-## Phase 6
-- [ ] Model comparison
+## Phase 6 – Model Comparison
+- [ ] Compare all models
+- [ ] Hyperparameter tuning
+- [ ] Select best model
 
-## Phase 7
-- [ ] World Cup simulation
+## Phase 7 – Tournament Simulation
+- [ ] Monte Carlo simulation
+- [ ] World Cup winner prediction
 
-## Phase 8
-- [ ] Web application
+## Phase 8 – Deployment
+- [ ] Streamlit/Flask web app
+- [ ] Deployment
 
 ---
 
@@ -233,6 +355,6 @@ This project is licensed under the MIT License.
 
 ---
 
-## ⭐ Support
+# ⭐ Support
 
 If you find this project useful, consider giving it a ⭐ on GitHub.
