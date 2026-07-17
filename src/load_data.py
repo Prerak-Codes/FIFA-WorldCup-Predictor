@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 # Project Root
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 RAW_DATA = BASE_DIR / "data" / "raw" 
 
