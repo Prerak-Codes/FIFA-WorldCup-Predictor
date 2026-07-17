@@ -62,13 +62,12 @@ FIFA-WorldCup-Predictor/
 ├── reports/
 │
 ├── src/
-│   └── data/
-│       ├── load_data.py
-│       ├── clean_results.py
-│       ├── clean_rankings.py
-│       ├── clean_elo.py
-│       ├── clean_match_features.py
-│       └── merge_data.py
+│   ├── load_data.py
+│   ├── clean_results.py
+│   ├── clean_rankings.py
+│   ├── clean_elo.py
+│   ├── clean_match_features.py
+│   └── merge_data.py
 │
 ├── tests/
 │
