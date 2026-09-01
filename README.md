@@ -132,22 +132,22 @@ This analysis provides the foundation for the upcoming data cleaning pipeline.
 Raw Datasets
       │
       ▼
-Load Data
+Load Data ✅
       │
       ▼
 Exploratory Data Analysis ✅
       │
       ▼
-Data Cleaning 🚧
+Data Cleaning ✅
       │
       ▼
-Dataset Merging
+Dataset Merging ✅
       │
       ▼
-Feature Engineering
+Feature Engineering ✅ (49,501 matches engineered)
       │
       ▼
-Model Training
+Model Training 🚧
       │
       ▼
 World Cup Simulation
@@ -195,40 +195,88 @@ World Cup Winner Probabilities
 ## ✅ Completed
 
 - Project structure created
-- Raw datasets organized
-- Data loading module implemented
-- Data preprocessing module structure created
+- Raw datasets organized (11 CSV files)
+- Data loading module implemented (11 loader functions)
 - Exploratory Data Analysis completed
+- Data cleaning completed (results, elo, rankings, match_features)
+- Dataset merging completed
+- Feature engineering completed (src/feature_engineering.py)
+- Training dataset generated (49,501 matches × 11 features)
 - GitHub project initialized
 
 ## 🚧 In Progress
 
-- Data cleaning
-- Data validation
+- Model training pipeline (Notebook 08)
+- Multiple ML model implementation
 
 ## ⏳ Upcoming
 
-- Dataset merging
-- Feature engineering
-- Model training
-- Tournament simulation
+- Model evaluation & comparison
+- World Cup simulation
 - Web application
 
 ---
 
-# 📈 Planned Features
+# � Feature Engineering (Completed)
 
-Examples of engineered features:
+Successfully engineered features from 49,501 international football matches spanning 155 years (1872-2026).
 
-- FIFA Ranking Difference
-- Elo Rating Difference
-- Last 5 Match Form
-- Last 10 Match Goal Difference
-- Average Goals Scored
-- Average Goals Conceded
-- Head-to-Head Record
-- Tournament Importance
-- Neutral Venue Indicator
+## Generated Training Dataset: `data/processed/training_data.csv`
+
+| Feature | Type | Description |
+|---------|------|-------------|
+| `date` | DateTime | Match date |
+| `home_team` | String | Home team name |
+| `away_team` | String | Away team name |
+| `tournament` | String | Tournament name |
+| `home_score` | Int | Goals scored by home team |
+| `away_score` | Int | Goals scored by away team |
+| `match_result` | String | Match outcome (Home Win/Draw/Away Win) |
+| `elo_diff` | Float | Elo rating difference |
+| `rank_diff` | Float | FIFA ranking difference |
+| `home_advantage` | Int | Binary indicator (1=home) |
+| `match_result_encoded` | Int | Encoded target (0=Home Win, 1=Draw, 2=Away Win) |
+
+## Feature Engineering Module: `src/feature_engineering.py`
+
+Provides reusable functions:
+- `load_interim_datasets()` - Loads all cleaned data
+- `engineer_features_optimized()` - Creates features from raw data
+- `preprocess_features()` - Handles feature preprocessing
+- `save_processed_data()` - Exports to CSV
+- `create_training_pipeline()` - Complete end-to-end pipeline
+
+## Related Notebook
+
+**`notebooks/07_feature_engineering.ipynb`** - Interactive notebook demonstrating:
+- Data loading and exploration
+- Feature engineering workflow
+- Feature analysis and correlation
+- Dataset statistics
+
+---
+
+# 📈 Engineered Features
+
+The following features have been created for model training:
+
+- ✅ Date and team information (home/away teams)
+- ✅ Match outcome (target variable)
+- ✅ Elo rating difference
+- ✅ FIFA ranking difference  
+- ✅ Home advantage indicator
+- ✅ Score information
+
+## Planned Feature Enhancements
+
+Future versions will include:
+
+- Last 5 match form
+- Last 10 match goal difference
+- Average goals scored/conceded
+- Head-to-head record
+- Tournament importance
+- Neutral venue indicator
 
 ---
 
@@ -294,17 +342,17 @@ After training the best model:
 
 ## Phase 2 – Data Understanding
 - [x] Exploratory Data Analysis (EDA)
-- [ ] Data cleaning
-- [ ] Data validation
+- [x] Data cleaning
+- [x] Data validation
 
 ## Phase 3 – Data Engineering
-- [ ] Dataset merging
-- [ ] Feature engineering
-- [ ] Processed dataset creation
+- [x] Dataset merging
+- [x] Feature engineering
+- [x] Processed dataset creation (training_data.csv)
 
-## Phase 4 – Machine Learning
+## Phase 4 – Machine Learning (Current)
 - [ ] Train/Test split
-- [ ] Baseline model
+- [ ] Baseline model (Logistic Regression)
 - [ ] Model evaluation
 
 ## Phase 5 – Advanced Models
