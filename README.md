@@ -41,35 +41,71 @@ Instead of directly predicting the tournament winner, the model predicts **indiv
 ```text
 FIFA-WorldCup-Predictor/
 │
-├── app/
+├── app/                                    # Web application (Flask/Streamlit)
 │
 ├── data/
-│   ├── raw/
+│   ├── raw/                               # ✅ Raw datasets (11 CSV files)
 │   │   ├── international_results/
+│   │   │   ├── results.csv
+│   │   │   ├── goalscorers.csv
+│   │   │   ├── shootouts.csv
+│   │   │   └── former_names.csv
 │   │   ├── elo_ratings/
+│   │   │   └── eloratings.csv
 │   │   ├── fifa_rankings/
+│   │   │   ├── fifa_ranking.csv
+│   │   │   ├── fifa_matches.csv
+│   │   │   └── fifa_teams.csv
 │   │   └── match_features/
+│   │       ├── player_aggregates.csv
+│   │       ├── teams_form.csv
+│   │       └── teams_match_features.csv
 │   │
-│   ├── interim/
-│   ├── processed/
-│   └── predictions/
+│   ├── interim/                           # ✅ Cleaned datasets
+│   │   ├── results_clean.csv
+│   │   ├── elo_clean.csv
+│   │   ├── rankings_clean.csv
+│   │   └── match_features_clean.csv
+│   │
+│   ├── processed/                         # ✅ Engineered features
+│   │   └── training_data.csv              # 49,501 matches × 11 features
+│   │
+│   └── predictions/                       # Tournament simulation results
 │
-├── models/
+├── models/                                 # Trained ML models
+│   ├── baseline_model.pkl
+│   ├── random_forest_model.pkl
+│   ├── xgboost_model.pkl
+│   └── best_model.pkl
 │
-├── notebooks/
-│   └── 01_dataset_exploration.ipynb
+├── notebooks/                              # Jupyter notebooks
+│   ├── 01_dataset_exploration.ipynb        # ✅ EDA
+│   ├── 02_clean_results.ipynb              # ✅ Clean results
+│   ├── 03_clean_elo.ipynb                  # ✅ Clean Elo ratings
+│   ├── 04_clean_rankings.ipynb             # ✅ Clean FIFA rankings
+│   ├── 05_clean_match_features.ipynb       # ✅ Clean match features
+│   ├── 06_dataset_merging.ipynb            # ✅ Merge datasets
+│   ├── 07_feature_engineering.ipynb        # ✅ Feature engineering
+│   ├── 08_model_training.ipynb             # 🚧 Model training
+│   ├── 09_model_evaluation.ipynb           # Model evaluation
+│   └── 10_tournament_simulation.ipynb      # Tournament simulation
 │
-├── reports/
+├── reports/                                # Analysis reports
+│   └── figures/                            # Visualizations
 │
-├── src/
-│   ├── load_data.py
-│   ├── clean_results.py
-│   ├── clean_rankings.py
-│   ├── clean_elo.py
-│   ├── clean_match_features.py
-│   └── merge_data.py
+├── src/                                    # Source code modules
+│   ├── load_data.py                        # ✅ Data loading (11 loaders)
+│   ├── clean_results.py                    # ✅ Clean results
+│   ├── clean_elo.py                        # ✅ Clean Elo
+│   ├── clean_rankings.py                   # ✅ Clean rankings
+│   ├── clean_match_features.py             # ✅ Clean match features
+│   ├── merge_data.py                       # ✅ Merge datasets
+│   ├── feature_engineering.py              # ✅ Feature engineering pipeline
+│   ├── train_model.py                      # Model training module
+│   ├── evaluate_model.py                   # Model evaluation module
+│   └── simulate_tournament.py              # Monte Carlo simulation
 │
-├── tests/
+├── tests/                                  # Unit tests
 │
 ├── .gitignore
 ├── LICENSE
