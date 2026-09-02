@@ -24,13 +24,13 @@ def load_interim_datasets():
 def engineer_features_optimized(results: pd.DataFrame, elo: pd.DataFrame, 
                                 rankings: pd.DataFrame, match_features: pd.DataFrame) -> pd.DataFrame:
     """
-    Engineer features using simpler approach with key metrics.
+    Engineer meaningful betting-style match features using historical Elo and ranking data.
     """
     results = results.copy()
     results['date'] = pd.to_datetime(results['date'])
-    
+    results = results.sort_values('date').reset_index(drop=True)
+
     print("   ✓ Creating target variable...")
-    # Determine match outcome
     def get_result(row):
         if row['home_score'] > row['away_score']:
             return 'Home Win'
@@ -38,26 +38,72 @@ def engineer_features_optimized(results: pd.DataFrame, elo: pd.DataFrame,
             return 'Away Win'
         else:
             return 'Draw'
-    
+
     results['match_result'] = results.apply(get_result, axis=1)
-    
-    # Keep core features only
-    print("   ✓ Preparing core features...")
-    engineered = results[[
-        'date', 'home_team', 'away_team', 'tournament',
-        'home_score', 'away_score', 'match_result'
-    ]].copy()
-    
-    # Add derived features
-    engineered['elo_diff'] = 0.0  # Placeholder - will be filled from Elo data
-    engineered['rank_diff'] = 0.0  # Placeholder - will be filled from rankings
-    engineered['home_advantage'] = 1
-    engineered['match_result_encoded'] = engineered['match_result'].map({
+
+    print("   ✓ Calculating Elo features...")
+    elo = elo.copy()
+    elo['date'] = pd.to_datetime(elo['date'])
+    elo_home = elo.rename(columns={'team': 'home_team', 'rating': 'home_elo'})[['home_team', 'date', 'home_elo']]
+    elo_away = elo.rename(columns={'team': 'away_team', 'rating': 'away_elo'})[['away_team', 'date', 'away_elo']]
+
+    results_home = pd.merge_asof(
+        results.sort_values(['home_team', 'date']).reset_index(drop=True),
+        elo_home.sort_values(['home_team', 'date']).reset_index(drop=True),
+        by='home_team',
+        left_on='date',
+        right_on='date',
+        direction='backward'
+    )
+    results_merged = pd.merge_asof(
+        results_home.sort_values(['away_team', 'date']).reset_index(drop=True),
+        elo_away.sort_values(['away_team', 'date']).reset_index(drop=True),
+        by='away_team',
+        left_on='date',
+        right_on='date',
+        direction='backward'
+    )
+
+    print("   ✓ Calculating FIFA ranking features...")
+    rankings = rankings.copy()
+    rankings['rank_date'] = pd.to_datetime(rankings['rank_date'])
+    ranking_home = rankings.rename(columns={'team': 'home_team', 'rank': 'home_rank'})[['home_team', 'rank_date', 'home_rank']]
+    ranking_away = rankings.rename(columns={'team': 'away_team', 'rank': 'away_rank'})[['away_team', 'rank_date', 'away_rank']]
+
+    results_merged = pd.merge_asof(
+        results_merged.sort_values(['home_team', 'date']).reset_index(drop=True),
+        ranking_home.sort_values(['home_team', 'rank_date']).reset_index(drop=True),
+        by='home_team',
+        left_on='date',
+        right_on='rank_date',
+        direction='backward'
+    )
+    results_merged = pd.merge_asof(
+        results_merged.sort_values(['away_team', 'date']).reset_index(drop=True),
+        ranking_away.sort_values(['away_team', 'rank_date']).reset_index(drop=True),
+        by='away_team',
+        left_on='date',
+        right_on='rank_date',
+        direction='backward'
+    )
+
+    results_merged['elo_diff'] = results_merged['home_elo'] - results_merged['away_elo']
+    results_merged['rank_diff'] = results_merged['away_rank'] - results_merged['home_rank']
+    results_merged['home_advantage'] = 1
+    results_merged['match_result_encoded'] = results_merged['match_result'].map({
         'Home Win': 0,
         'Draw': 1,
         'Away Win': 2
     })
-    
+
+    engineered = results_merged[[
+        'date', 'home_team', 'away_team', 'tournament',
+        'home_score', 'away_score', 'match_result',
+        'home_elo', 'away_elo', 'elo_diff',
+        'home_rank', 'away_rank', 'rank_diff',
+        'home_advantage', 'match_result_encoded'
+    ]].copy()
+
     return engineered
 
 
