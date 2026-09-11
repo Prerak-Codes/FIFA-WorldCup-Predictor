@@ -28,7 +28,7 @@ def load_elo():
 
 
 def load_rankings():
-    return pd.read_csv(RAW_DATA / "fifa_rankings" / "fifa_ranking.csv")
+    return pd.read_csv(RAW_DATA / "fifa_rankings" / "fifa_rankings.csv")
 
 
 def load_fifa_matches():

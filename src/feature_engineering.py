@@ -22,15 +22,16 @@ def load_interim_datasets():
 
 
 def engineer_features_optimized(results: pd.DataFrame, elo: pd.DataFrame, 
-                                rankings: pd.DataFrame, match_features: pd.DataFrame) -> pd.DataFrame:
+                                rankings: pd.DataFrame, match_features: pd.DataFrame = None) -> pd.DataFrame:
     """
     Engineer meaningful betting-style match features using historical Elo and ranking data.
+    Performs temporal as-of joins to ensure no future data leakage.
     """
     results = results.copy()
     results['date'] = pd.to_datetime(results['date'])
     results = results.sort_values('date').reset_index(drop=True)
 
-    print("   ✓ Creating target variable...")
+    print("   [OK] Creating target variable and match outcomes...")
     def get_result(row):
         if row['home_score'] > row['away_score']:
             return 'Home Win'
@@ -41,55 +42,65 @@ def engineer_features_optimized(results: pd.DataFrame, elo: pd.DataFrame,
 
     results['match_result'] = results.apply(get_result, axis=1)
 
-    print("   ✓ Calculating Elo features...")
+    # Home advantage: 1 if true home match, 0 if neutral venue
+    if 'neutral' in results.columns:
+        results['home_advantage'] = (~results['neutral'].fillna(False).astype(bool)).astype(int)
+    else:
+        results['home_advantage'] = 1
+
+    print("   [OK] Calculating Elo features (as-of temporal join)...")
     elo = elo.copy()
     elo['date'] = pd.to_datetime(elo['date'])
-    elo_home = elo.rename(columns={'team': 'home_team', 'rating': 'home_elo'})[['home_team', 'date', 'home_elo']]
-    elo_away = elo.rename(columns={'team': 'away_team', 'rating': 'away_elo'})[['away_team', 'date', 'away_elo']]
+    elo_home = elo.rename(columns={'team': 'home_team', 'rating': 'home_elo'})[['home_team', 'date', 'home_elo']].sort_values('date').reset_index(drop=True)
+    elo_away = elo.rename(columns={'team': 'away_team', 'rating': 'away_elo'})[['away_team', 'date', 'away_elo']].sort_values('date').reset_index(drop=True)
 
-    results_home = pd.merge_asof(
-        results.sort_values(['home_team', 'date']).reset_index(drop=True),
-        elo_home.sort_values(['home_team', 'date']).reset_index(drop=True),
+    results_merged = pd.merge_asof(
+        results.sort_values('date').reset_index(drop=True),
+        elo_home,
         by='home_team',
-        left_on='date',
-        right_on='date',
+        on='date',
         direction='backward'
     )
     results_merged = pd.merge_asof(
-        results_home.sort_values(['away_team', 'date']).reset_index(drop=True),
-        elo_away.sort_values(['away_team', 'date']).reset_index(drop=True),
+        results_merged.sort_values('date').reset_index(drop=True),
+        elo_away,
         by='away_team',
-        left_on='date',
-        right_on='date',
+        on='date',
         direction='backward'
     )
 
-    print("   ✓ Calculating FIFA ranking features...")
+    print("   [OK] Calculating FIFA ranking features (as-of temporal join)...")
     rankings = rankings.copy()
     rankings['rank_date'] = pd.to_datetime(rankings['rank_date'])
-    ranking_home = rankings.rename(columns={'team': 'home_team', 'rank': 'home_rank'})[['home_team', 'rank_date', 'home_rank']]
-    ranking_away = rankings.rename(columns={'team': 'away_team', 'rank': 'away_rank'})[['away_team', 'rank_date', 'away_rank']]
+    ranking_home = rankings.rename(columns={'team': 'home_team', 'rank': 'home_rank'})[['home_team', 'rank_date', 'home_rank']].sort_values('rank_date').reset_index(drop=True)
+    ranking_away = rankings.rename(columns={'team': 'away_team', 'rank': 'away_rank'})[['away_team', 'rank_date', 'away_rank']].sort_values('rank_date').reset_index(drop=True)
 
     results_merged = pd.merge_asof(
-        results_merged.sort_values(['home_team', 'date']).reset_index(drop=True),
-        ranking_home.sort_values(['home_team', 'rank_date']).reset_index(drop=True),
+        results_merged.sort_values('date').reset_index(drop=True),
+        ranking_home,
         by='home_team',
         left_on='date',
         right_on='rank_date',
         direction='backward'
     )
     results_merged = pd.merge_asof(
-        results_merged.sort_values(['away_team', 'date']).reset_index(drop=True),
-        ranking_away.sort_values(['away_team', 'rank_date']).reset_index(drop=True),
+        results_merged.sort_values('date').reset_index(drop=True),
+        ranking_away,
         by='away_team',
         left_on='date',
         right_on='rank_date',
         direction='backward'
     )
 
-    results_merged['elo_diff'] = results_merged['home_elo'] - results_merged['away_elo']
-    results_merged['rank_diff'] = results_merged['away_rank'] - results_merged['home_rank']
-    results_merged['home_advantage'] = 1
+    # Derived rating differences with standard baseline imputation
+    home_elo_filled = results_merged['home_elo'].fillna(1500.0)
+    away_elo_filled = results_merged['away_elo'].fillna(1500.0)
+    results_merged['elo_diff'] = home_elo_filled - away_elo_filled
+
+    home_rank_filled = results_merged['home_rank'].fillna(215.0)
+    away_rank_filled = results_merged['away_rank'].fillna(215.0)
+    results_merged['rank_diff'] = away_rank_filled - home_rank_filled
+
     results_merged['match_result_encoded'] = results_merged['match_result'].map({
         'Home Win': 0,
         'Draw': 1,
@@ -118,7 +129,7 @@ def save_processed_data(df: pd.DataFrame, filename: str = 'training_data.csv'):
     """Save processed training data to CSV."""
     output_path = PROCESSED_DATA / filename
     df.to_csv(output_path, index=False)
-    print(f"✓ Processed data saved to: {output_path}")
+    print(f"[OK] Processed data saved to: {output_path}")
     return output_path
 
 
@@ -131,19 +142,19 @@ def create_training_pipeline():
     # Load data
     print("\n1. Loading interim datasets...")
     results, elo, rankings, match_features = load_interim_datasets()
-    print(f"   ✓ Results: {len(results)} matches")
-    print(f"   ✓ Elo: {len(elo)} records")
-    print(f"   ✓ Rankings: {len(rankings)} records")
+    print(f"   [OK] Results: {len(results)} matches")
+    print(f"   [OK] Elo: {len(elo)} records")
+    print(f"   [OK] Rankings: {len(rankings)} records")
     
     # Engineer features
     print("\n2. Engineering features...")
     engineered = engineer_features_optimized(results, elo, rankings, match_features)
-    print(f"   ✓ Features engineered: {engineered.shape}")
+    print(f"   [OK] Features engineered: {engineered.shape}")
     
     # Preprocess features
     print("\n3. Preprocessing features...")
     processed = preprocess_features(engineered)
-    print(f"   ✓ Features processed: {processed.shape}")
+    print(f"   [OK] Features processed: {processed.shape}")
     
     # Save data
     print("\n4. Saving processed data...")
@@ -153,9 +164,12 @@ def create_training_pipeline():
     print("FEATURE ENGINEERING COMPLETE!")
     print("=" * 60)
     print(f"\nDataset Summary:")
-    print(f"  • Total Matches: {len(processed)}")
-    print(f"  • Total Features: {len(processed.columns)}")
-    print(f"  • Date Range: {processed['date'].min()} to {processed['date'].max()}")
+    print(f"  * Total Matches: {len(processed)}")
+    print(f"  * Total Features: {len(processed.columns)}")
+    print(f"  * Date Range: {processed['date'].min()} to {processed['date'].max()}")
+    print(f"  * Non-zero elo_diff: {(processed['elo_diff'] != 0).sum()} matches")
+    print(f"  * Non-zero rank_diff: {(processed['rank_diff'] != 0).sum()} matches")
+    print(f"  * Neutral matches (home_advantage=0): {(processed['home_advantage'] == 0).sum()} matches")
     
     return processed
 
@@ -163,6 +177,4 @@ def create_training_pipeline():
 if __name__ == "__main__":
     training_data = create_training_pipeline()
     print("\nFirst few rows:")
-    print(training_data.head(10).to_string())
-
-    print("\n" + training_data.head())
+    print(training_data.head(5).to_string())

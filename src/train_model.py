@@ -31,7 +31,7 @@ def load_training_data():
 
 
 def build_model_pipeline():
-    numeric_features = ["elo_diff", "rank_diff", "home_advantage"]
+    numeric_features = ["match_year", "elo_diff", "rank_diff", "home_advantage"]
     categorical_features = ["home_team", "away_team", "tournament"]
 
     preprocessor = ColumnTransformer(
@@ -51,7 +51,6 @@ def build_model_pipeline():
 
     models = {
         "logistic_regression": LogisticRegression(
-            multi_class="multinomial",
             max_iter=2000,
             class_weight="balanced",
             random_state=42,
