@@ -1,443 +1,248 @@
-# ⚽ FIFA World Cup Winner Prediction using Machine Learning
+# ⚽ FIFA World Cup Predictor — ML-Powered Match & Tournament Forecaster
 
-> Predict FIFA World Cup match outcomes and estimate each team's probability of winning the tournament using Machine Learning, Feature Engineering, and Monte Carlo Simulation.
+> Predict international match outcomes and simulate the FIFA World Cup using Machine Learning, Feature Engineering, and Monte Carlo Simulation.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange?logo=scikitlearn)
-![XGBoost](https://img.shields.io/badge/XGBoost-Gradient%20Boosting-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-![Status](https://img.shields.io/badge/Status-In%20Progress-red)
+![XGBoost](https://img.shields.io/badge/XGBoost-62.7%25_Accuracy-green)
+![LightGBM](https://img.shields.io/badge/LightGBM-0.8219_LogLoss-yellow)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.63-red?logo=streamlit)
+![Tests](https://img.shields.io/badge/Tests-56%20passed-brightgreen)
+![Status](https://img.shields.io/badge/Status-Complete-success)
 
 ---
 
-# 📌 Project Overview
+## 🏆 Project Overview
 
-This project aims to build a machine learning system capable of:
+This project builds a **complete end-to-end football prediction system** capable of:
 
-- Predicting international football match outcomes.
-- Estimating match win/draw/loss probabilities.
-- Simulating an entire FIFA World Cup tournament.
-- Calculating each team's probability of becoming World Cup Champion.
+- **Predicting international match outcomes** (Win / Draw / Loss probabilities)
+- **Simulating entire FIFA World Cup tournaments** from group stages to the final
+- **Estimating championship probability** for all 32 qualified nations via 10,000 Monte Carlo runs
+- **Serving predictions interactively** through a Streamlit dashboard
 
-Instead of directly predicting the tournament winner, the model predicts **individual match outcomes**, which are then used in **Monte Carlo simulations** to estimate championship probabilities.
+**Key results on the 2021–2026 holdout test set:**
 
----
-
-# 🎯 Objectives
-
-- Collect historical international football data.
-- Organize multiple football datasets.
-- Perform exploratory data analysis (EDA).
-- Clean and preprocess datasets.
-- Engineer meaningful football features.
-- Train and compare multiple ML models.
-- Simulate the FIFA World Cup.
-- Build a web application for predictions.
+| Model | Accuracy | Log Loss |
+|---|---|---|
+| Logistic Regression | 58.6% | 0.892 |
+| Random Forest | 59.4% | 0.896 |
+| Gradient Boosting | 61.1% | 0.851 |
+| **XGBoost ⭐ (Champion)** | **62.71%** | **0.832** |
+| LightGBM | 62.3% | **0.822** |
 
 ---
 
-# 📂 Project Structure
+## 🗂️ Project Structure
 
 ```text
 FIFA-WorldCup-Predictor/
 │
-├── app/                                    # Web application (Flask/Streamlit)
+├── app/                            # Streamlit web application
+│   ├── __init__.py
+│   ├── main.py                     # 3-tab interactive dashboard
+│   └── utils.py                    # Shared loaders, predictors, charts
 │
 ├── data/
-│   ├── raw/                               # ✅ Raw datasets (11 CSV files)
-│   │   ├── international_results/
-│   │   │   ├── results.csv
-│   │   │   ├── goalscorers.csv
-│   │   │   ├── shootouts.csv
-│   │   │   └── former_names.csv
-│   │   ├── elo_ratings/
-│   │   │   └── eloratings.csv
-│   │   ├── fifa_rankings/
-│   │   │   ├── fifa_ranking.csv
-│   │   │   ├── fifa_matches.csv
-│   │   │   └── fifa_teams.csv
-│   │   └── match_features/
-│   │       ├── player_aggregates.csv
-│   │       ├── teams_form.csv
-│   │       └── teams_match_features.csv
-│   │
-│   ├── interim/                           # ✅ Cleaned datasets
-│   │   ├── results_clean.csv
-│   │   ├── elo_clean.csv
-│   │   ├── rankings_clean.csv
-│   │   └── match_features_clean.csv
-│   │
-│   ├── processed/                         # ✅ Engineered features
-│   │   └── training_data.csv              # 49,501 matches × 11 features
-│   │
-│   └── predictions/                       # Tournament simulation results
+│   ├── raw/                        # Original datasets (11 CSV files)
+│   │   ├── international_results/  # Results, goalscorers, shootouts
+│   │   ├── elo_ratings/            # Club Elo ratings
+│   │   ├── fifa_rankings/          # FIFA world rankings
+│   │   └── match_features/         # FIFA player attributes
+│   ├── interim/                    # Cleaned intermediate data
+│   └── processed/                  # Final training_data.csv (49,501 matches)
 │
-├── models/                                 # Trained ML models
-│   ├── baseline_model.pkl
-│   ├── random_forest_model.pkl
-│   ├── xgboost_model.pkl
-│   └── best_model.pkl
+├── models/                         # Serialized model checkpoints
+│   ├── best_model.pkl              # XGBoost (champion)
+│   ├── xgboost.pkl
+│   ├── lightgbm.pkl
+│   ├── random_forest.pkl
+│   └── logistic_regression.pkl
 │
-├── notebooks/                              # Jupyter notebooks
-│   ├── 01_dataset_exploration.ipynb        # ✅ EDA
-│   ├── 02_clean_results.ipynb              # ✅ Clean results
-│   ├── 03_clean_elo.ipynb                  # ✅ Clean Elo ratings
-│   ├── 04_clean_rankings.ipynb             # ✅ Clean FIFA rankings
-│   ├── 05_clean_match_features.ipynb       # ✅ Clean match features
-│   ├── 06_dataset_merging.ipynb            # ✅ Merge datasets
-│   ├── 07_feature_engineering.ipynb        # ✅ Feature engineering
-│   ├── 08_model_training.ipynb             # 🚧 Model training
-│   ├── 09_model_evaluation.ipynb           # Model evaluation
-│   └── 10_tournament_simulation.ipynb      # Tournament simulation
+├── notebooks/                      # Jupyter analysis notebooks
+│   ├── 01–06_*.ipynb               # EDA, cleaning, merging
+│   ├── 07_feature_engineering.ipynb
+│   ├── 08_model_training.ipynb
+│   ├── 09_model_evaluation.ipynb
+│   └── 10_tournament_simulation.ipynb
 │
-├── reports/                                # Analysis reports
-│   └── figures/                            # Visualizations
+├── reports/
+│   └── model_evaluation.json       # Benchmark metrics (all 5 models)
 │
-├── src/                                    # Source code modules
-│   ├── load_data.py                        # ✅ Data loading (11 loaders)
-│   ├── clean_results.py                    # ✅ Clean results
-│   ├── clean_elo.py                        # ✅ Clean Elo
-│   ├── clean_rankings.py                   # ✅ Clean rankings
-│   ├── clean_match_features.py             # ✅ Clean match features
-│   ├── merge_data.py                       # ✅ Merge datasets
-│   ├── feature_engineering.py              # ✅ Feature engineering pipeline
-│   ├── train_model.py                      # Model training module
-│   ├── evaluate_model.py                   # Model evaluation module
-│   └── simulate_tournament.py              # Monte Carlo simulation
+├── src/                            # Core Python modules
+│   ├── load_data.py                # Raw data loaders
+│   ├── clean_elo.py                # Elo data cleaning
+│   ├── feature_engineering.py      # Temporal feature pipeline
+│   ├── train_model.py              # Model training & checkpointing
+│   ├── evaluate_model.py           # Evaluation & reporting
+│   └── simulate_tournament.py      # Monte Carlo tournament engine
 │
-├── tests/                                  # Unit tests
+├── tests/                          # Automated test suite (56 tests)
+│   ├── conftest.py                 # Shared pytest fixtures
+│   ├── test_load_data.py
+│   ├── test_feature_engineering.py
+│   ├── test_model.py
+│   └── test_simulation.py
 │
-├── .gitignore
-├── LICENSE
-├── README.md
-└── requirements.txt
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-# 📊 Datasets
+## ⚡ Quick Start
 
-This project combines multiple football datasets.
+### 1. Clone & Install
 
-| Dataset | Purpose |
-|----------|----------|
-| International Results | Historical international match results |
-| FIFA Rankings | Official FIFA rankings |
-| Elo Ratings | Team strength ratings |
-| Match Features | Team and player feature datasets |
+```powershell
+git clone https://github.com/Prerak-Codes/FIFA-WorldCup-Predictor.git
+cd FIFA-WorldCup-Predictor
 
-Current raw datasets include:
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 
-- results.csv
-- goalscorers.csv
-- shootouts.csv
-- former_names.csv
-- eloratings.csv
-- fifa_ranking.csv
-- fifa_matches.csv
-- fifa_teams.csv
-- player_aggregates.csv
-- teams_form.csv
-- teams_match_features.csv
-
----
-
-# 📊 Exploratory Data Analysis (Completed)
-
-The initial EDA has been completed for all datasets.
-
-The exploration includes:
-
-- Dataset dimensions
-- Column inspection
-- Data types
-- Missing value analysis
-- Duplicate detection
-- Statistical summaries
-- Team distribution
-- Tournament distribution
-- Date range analysis
-
-This analysis provides the foundation for the upcoming data cleaning pipeline.
-
----
-
-# ⚙️ Current Data Pipeline
-
+# Install dependencies
+pip install -r requirements.txt
 ```
-Raw Datasets
-      │
-      ▼
-Load Data ✅
-      │
-      ▼
-Exploratory Data Analysis ✅
-      │
-      ▼
-Data Cleaning ✅
-      │
-      ▼
-Dataset Merging ✅
-      │
-      ▼
-Feature Engineering ✅ (49,501 matches engineered)
-      │
-      ▼
-Model Training 🚧
-      │
-      ▼
-World Cup Simulation
+
+### 2. Launch the Interactive Dashboard
+
+```powershell
+.venv\Scripts\streamlit run app/main.py
+# Opens at http://localhost:8501
+```
+
+### 3. Run Simulations from CLI
+
+```powershell
+# Run 10,000 Monte Carlo simulations and export results
+.venv\Scripts\python src/simulate_tournament.py --simulations 10000 --seed 42
+
+# View results
+Get-Content data/predictions/world_cup_simulation_summary.csv | Select-Object -First 12
+```
+
+### 4. Re-train Models
+
+```powershell
+.venv\Scripts\python src/feature_engineering.py  # Rebuild training data
+.venv\Scripts\python src/train_model.py           # Train all 5 models
+.venv\Scripts\python src/evaluate_model.py        # Print benchmark table
+```
+
+### 5. Run Tests
+
+```powershell
+.venv\Scripts\python -m pytest tests/ -v
+# Expected: 56 passed in ~4 seconds
 ```
 
 ---
 
-# 🧠 Machine Learning Pipeline
+## 🌐 Streamlit Dashboard
 
-```text
-Raw Datasets
-      │
-      ▼
-Data Cleaning
-      │
-      ▼
-Dataset Merging
-      │
-      ▼
-Feature Engineering
-      │
-      ▼
-Train/Test Split
-      │
-      ▼
-Model Training
-      │
-      ▼
-Model Evaluation
-      │
-      ▼
-Match Prediction
-      │
-      ▼
-Monte Carlo Simulation
-      │
-      ▼
-World Cup Winner Probabilities
+Launch with `.venv\Scripts\streamlit run app/main.py`, then navigate to `http://localhost:8501`.
+
+### Tab 1 — 🆚 Head-to-Head Match Predictor
+- Choose any two of the 32 World Cup 2026 nations
+- Toggle **Neutral Venue** on/off
+- Select tournament type (World Cup / Euro / Copa / Friendly)
+- Instantly see **Win / Draw / Loss probabilities** as a colour-coded stacked bar
+- Compare both teams' Elo ratings, FIFA rank, attack, defense, and form
+
+### Tab 2 — 🏆 World Cup Bracket Simulator
+- **Single Simulation**: Click one button to play out a full bracket — see group standings with 🥇/🥈/❌ and knockout rounds with green/grey highlights
+- **Monte Carlo Leaderboard**: Championship probability bar chart + stage progression heatmap for all 32 nations + full sortable table
+
+### Tab 3 — 📊 Team Analytics Explorer
+- Select up to **8 teams** simultaneously
+- **Elo history line chart** spanning the full history of international football (270 nations)
+- **Radar/spider chart** comparing Attack, Defense, Overall, Form WR, and Elo across selected teams
+
+---
+
+## 🔬 Model Features (13 numeric + 3 categorical)
+
+| Feature | Description |
+|---|---|
+| `elo_diff` | Elo rating difference (home − away) |
+| `rank_diff` | FIFA ranking difference (away − home, lower = better) |
+| `home_advantage` | 1 if true home venue, 0 if neutral |
+| `h2h_win_rate_diff` | Historical head-to-head win rate advantage |
+| `h2h_total_matches` | Prior meetings between the two teams |
+| `form_win_rate_diff` | Recent 5-match form win rate differential |
+| `form_goal_diff` | Recent 5-match average goal difference |
+| `overall_diff` | FIFA squad overall rating gap |
+| `attack_diff` | FIFA attack rating gap |
+| `defense_diff` | FIFA defense rating gap |
+| `is_world_cup` | 1 if World Cup match |
+| `is_continental` | 1 if continental championship (Euro/Copa/etc.) |
+| `match_year` | Year of the match |
+| `home_team` | Home team (one-hot encoded) |
+| `away_team` | Away team (one-hot encoded) |
+| `tournament` | Tournament name (one-hot encoded) |
+
+---
+
+## 🏅 World Cup 2026 Predictions (10,000 Monte Carlo Simulations)
+
+| Rank | Team | Elo | FIFA Rank | R16% | QF% | SF% | Final% | Champion% |
+|---|---|---|---|---|---|---|---|---|
+| 1 | **Spain** | 2171 | 7 | 76.1% | 51.4% | 34.1% | 22.1% | **13.85%** |
+| 2 | **England** | 2042 | 5 | 82.3% | 54.0% | 32.7% | 19.0% | **11.48%** |
+| 3 | **France** | 2062 | 4 | 68.3% | 43.6% | 25.9% | 14.8% | **8.57%** |
+| 4 | **Brazil** | 1979 | 1 | 70.0% | 43.7% | 24.1% | 13.8% | **7.32%** |
+| 5 | **Argentina** | 2113 | 3 | 76.1% | 41.7% | 23.5% | 12.3% | **6.56%** |
+| 6 | Netherlands | 1959 | 8 | 70.6% | 40.2% | 22.6% | 11.4% | 5.49% |
+| 7 | Germany | 1910 | 11 | 62.0% | 33.0% | 18.7% | 9.9% | 4.80% |
+| 8 | Belgium | 1849 | 2 | 61.8% | 30.4% | 16.8% | 8.8% | 4.52% |
+
+---
+
+## 🚀 Implementation Roadmap
+
+| Phase | Description | Status |
+|---|---|---|
+| **Phase 1** | Data pipeline fixes, Elo cleaning, `requirements.txt` | ✅ Complete |
+| **Phase 2** | Head-to-head features, FIFA squad features, `StandardScaler` | ✅ Complete |
+| **Phase 3** | Temporal validation split, sample weighting, model checkpoints | ✅ Complete |
+| **Phase 4** | XGBoost & LightGBM integration, hyperparameter tuning | ✅ Complete |
+| **Phase 5** | Monte Carlo simulation engine, prediction exports | ✅ Complete |
+| **Phase 6** | Streamlit interactive dashboard (3 tabs) | ✅ Complete |
+| **Phase 7** | Automated test suite (56 tests), README documentation | ✅ Complete |
+
+---
+
+## 🧪 Tests
+
+56 automated tests across 4 modules:
+
+```
+tests/
+  test_load_data.py           — Raw CSV loader integrity (14 tests)
+  test_feature_engineering.py — Temporal ordering, no-leakage, feature validity (12 tests)
+  test_model.py               — Inference shape, probability calibration, batch API (8 tests)
+  test_simulation.py          — Group stage, knockout bracket, Monte Carlo correctness (22 tests)
+```
+
+Run with:
+```powershell
+.venv\Scripts\python -m pytest tests/ -v
 ```
 
 ---
 
-# 🛠️ Current Progress
+## 📦 Dependencies
 
-## ✅ Completed
-
-- Project structure created
-- Raw datasets organized (11 CSV files)
-- Data loading module implemented (11 loader functions)
-- Exploratory Data Analysis completed
-- Data cleaning completed (results, elo, rankings, match_features)
-- Dataset merging completed
-- Feature engineering completed (src/feature_engineering.py)
-- Training dataset generated (49,501 matches × 11 features)
-- GitHub project initialized
-
-## 🚧 In Progress
-
-- Model training pipeline (Notebook 08)
-- Multiple ML model implementation
-
-## ⏳ Upcoming
-
-- Model evaluation & comparison
-- World Cup simulation
-- Web application
+```
+pandas>=2.2.0        numpy>=1.26.0        scikit-learn>=1.4.0
+xgboost>=2.0.0       lightgbm>=4.0.0      plotly>=5.20.0
+streamlit>=1.35.0    pytest>=8.0.0        scipy>=1.12.0
+```
 
 ---
 
-# � Feature Engineering (Completed)
+## 📄 License
 
-Successfully engineered features from 49,501 international football matches spanning 155 years (1872-2026).
-
-## Generated Training Dataset: `data/processed/training_data.csv`
-
-| Feature | Type | Description |
-|---------|------|-------------|
-| `date` | DateTime | Match date |
-| `home_team` | String | Home team name |
-| `away_team` | String | Away team name |
-| `tournament` | String | Tournament name |
-| `home_score` | Int | Goals scored by home team |
-| `away_score` | Int | Goals scored by away team |
-| `match_result` | String | Match outcome (Home Win/Draw/Away Win) |
-| `elo_diff` | Float | Elo rating difference |
-| `rank_diff` | Float | FIFA ranking difference |
-| `home_advantage` | Int | Binary indicator (1=home) |
-| `match_result_encoded` | Int | Encoded target (0=Home Win, 1=Draw, 2=Away Win) |
-
-## Feature Engineering Module: `src/feature_engineering.py`
-
-Provides reusable functions:
-- `load_interim_datasets()` - Loads all cleaned data
-- `engineer_features_optimized()` - Creates features from raw data
-- `preprocess_features()` - Handles feature preprocessing
-- `save_processed_data()` - Exports to CSV
-- `create_training_pipeline()` - Complete end-to-end pipeline
-
-## Related Notebook
-
-**`notebooks/07_feature_engineering.ipynb`** - Interactive notebook demonstrating:
-- Data loading and exploration
-- Feature engineering workflow
-- Feature analysis and correlation
-- Dataset statistics
-
----
-
-# 📈 Engineered Features
-
-The following features have been created for model training:
-
-- ✅ Date and team information (home/away teams)
-- ✅ Match outcome (target variable)
-- ✅ Elo rating difference
-- ✅ FIFA ranking difference  
-- ✅ Home advantage indicator
-- ✅ Score information
-
-## Planned Feature Enhancements
-
-Future versions will include:
-
-- Last 5 match form
-- Last 10 match goal difference
-- Average goals scored/conceded
-- Head-to-head record
-- Tournament importance
-- Neutral venue indicator
-
----
-
-# 🤖 Planned Machine Learning Models
-
-The following models will be implemented and compared.
-
-- Logistic Regression
-- Decision Tree
-- Random Forest
-- XGBoost
-- LightGBM
-- CatBoost
-
-The best-performing model will be selected based on evaluation metrics.
-
----
-
-# 📊 Planned Evaluation Metrics
-
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-- Confusion Matrix
-- Log Loss
-
----
-
-# 🌍 Planned World Cup Simulation
-
-After training the best model:
-
-- Predict every tournament match.
-- Simulate the FIFA World Cup thousands of times.
-- Estimate each team's probability of becoming champion.
-
----
-
-# 🚀 Technologies Used
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Scikit-Learn
-- XGBoost
-- LightGBM
-- CatBoost
-- Jupyter Notebook
-- Git
-- GitHub
-
----
-
-# 📅 Development Roadmap
-
-## Phase 1 – Project Initialization
-- [x] Project structure
-- [x] Dataset collection
-- [x] Raw dataset organization
-- [x] Data loading module
-
-## Phase 2 – Data Understanding
-- [x] Exploratory Data Analysis (EDA)
-- [x] Data cleaning
-- [x] Data validation
-
-## Phase 3 – Data Engineering
-- [x] Dataset merging
-- [x] Feature engineering
-- [x] Processed dataset creation (training_data.csv)
-
-## Phase 4 – Machine Learning (Current)
-- [ ] Train/Test split
-- [ ] Baseline model (Logistic Regression)
-- [ ] Model evaluation
-
-## Phase 5 – Advanced Models
-- [ ] Random Forest
-- [ ] XGBoost
-- [ ] LightGBM
-- [ ] CatBoost
-
-## Phase 6 – Model Comparison
-- [ ] Compare all models
-- [ ] Hyperparameter tuning
-- [ ] Select best model
-
-## Phase 7 – Tournament Simulation
-- [ ] Monte Carlo simulation
-- [ ] World Cup winner prediction
-
-## Phase 8 – Deployment
-- [ ] Streamlit/Flask web app
-- [ ] Deployment
-
----
-
-# 📌 Future Improvements
-
-- Player-level statistics
-- Injury reports
-- Team market values
-- Live FIFA rankings
-- Betting odds integration
-- Explainable AI (SHAP)
-- Automated data pipeline
-
----
-
-# 🤝 Contributing
-
-Contributions, suggestions, and improvements are welcome.
-
-Feel free to fork the repository and create a pull request.
-
----
-
-# 📜 License
-
-This project is licensed under the MIT License.
-
----
-
-# ⭐ Support
-
-If you find this project useful, consider giving it a ⭐ on GitHub.
+MIT License — see [LICENSE](LICENSE) for details.
