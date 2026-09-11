@@ -10,6 +10,8 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, l
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
+from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROCESSED_DATA = BASE_DIR / "data" / "processed"
@@ -82,6 +84,25 @@ def build_model_pipeline():
         "gradient_boosting": GradientBoostingClassifier(
             n_estimators=150,
             random_state=42
+        ),
+        "xgboost": XGBClassifier(
+            n_estimators=150,
+            max_depth=5,
+            learning_rate=0.08,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=42,
+            eval_metric="mlogloss",
+        ),
+        "lightgbm": LGBMClassifier(
+            n_estimators=200,
+            max_depth=6,
+            num_leaves=31,
+            learning_rate=0.05,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=42,
+            verbose=-1,
         ),
     }
 

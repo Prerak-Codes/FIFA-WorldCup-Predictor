@@ -5,10 +5,10 @@
   "models": {
     "best_model": {
       "file": "best_model.pkl",
-      "accuracy": 0.6032185499221319,
-      "balanced_accuracy": 0.5467630218286077,
-      "log_loss": 0.8561439568992291,
-      "macro_f1": 0.5345230605973784,
+      "accuracy": 0.6270981138605295,
+      "balanced_accuracy": 0.5373272757305733,
+      "log_loss": 0.8259234428405762,
+      "macro_f1": 0.48367838514673395,
       "confusion_matrix": {
         "labels": [
           "Home Win",
@@ -17,52 +17,52 @@
         ],
         "rows_actual_columns_predicted": [
           [
-            2032,
-            359,
-            380
+            2346,
+            43,
+            382
           ],
           [
-            572,
-            273,
-            477
+            746,
+            45,
+            531
           ],
           [
-            274,
-            231,
-            1181
+            442,
+            11,
+            1233
           ]
         ]
       },
       "classification_report": {
         "Home Win": {
-          "precision": 0.7060458651841557,
-          "recall": 0.7333092746300974,
-          "f1-score": 0.719419366259515,
+          "precision": 0.6638370118845501,
+          "recall": 0.8466257668711656,
+          "f1-score": 0.7441712926249009,
           "support": 2771.0
         },
         "Draw": {
-          "precision": 0.3163383545770568,
-          "recall": 0.2065052950075643,
-          "f1-score": 0.24988558352402745,
+          "precision": 0.45454545454545453,
+          "recall": 0.0340393343419062,
+          "f1-score": 0.0633356790992259,
           "support": 1322.0
         },
         "Away Win": {
-          "precision": 0.5794896957801766,
-          "recall": 0.7004744958481613,
-          "f1-score": 0.6342642320085929,
+          "precision": 0.5745573159366263,
+          "recall": 0.7313167259786477,
+          "f1-score": 0.6435281837160751,
           "support": 1686.0
         },
-        "accuracy": 0.6032185499221319,
+        "accuracy": 0.6270981138605295,
         "macro avg": {
-          "precision": 0.5339579718471298,
-          "recall": 0.5467630218286077,
-          "f1-score": 0.5345230605973784,
+          "precision": 0.564313260788877,
+          "recall": 0.5373272757305733,
+          "f1-score": 0.48367838514673395,
           "support": 5779.0
         },
         "weighted avg": {
-          "precision": 0.5799743942311026,
-          "recall": 0.6032185499221319,
-          "f1-score": 0.5871654785413337,
+          "precision": 0.5899126294359459,
+          "recall": 0.6270981138605295,
+          "f1-score": 0.5590615915172313,
           "support": 5779.0
         }
       }
@@ -127,6 +127,70 @@
           "precision": 0.6015781269910985,
           "recall": 0.5812424294860703,
           "f1-score": 0.5865882646659479,
+          "support": 5779.0
+        }
+      }
+    },
+    "lightgbm": {
+      "file": "lightgbm.pkl",
+      "accuracy": 0.6267520332237412,
+      "balanced_accuracy": 0.5399269363714857,
+      "log_loss": 0.8218597915530933,
+      "macro_f1": 0.49472190945790456,
+      "confusion_matrix": {
+        "labels": [
+          "Home Win",
+          "Draw",
+          "Away Win"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2327,
+            67,
+            377
+          ],
+          [
+            739,
+            73,
+            510
+          ],
+          [
+            431,
+            33,
+            1222
+          ]
+        ]
+      },
+      "classification_report": {
+        "Home Win": {
+          "precision": 0.6654275092936803,
+          "recall": 0.8397690364489354,
+          "f1-score": 0.742501595405233,
+          "support": 2771.0
+        },
+        "Draw": {
+          "precision": 0.42196531791907516,
+          "recall": 0.05521936459909228,
+          "f1-score": 0.09765886287625418,
+          "support": 1322.0
+        },
+        "Away Win": {
+          "precision": 0.5794215267899478,
+          "recall": 0.7247924080664294,
+          "f1-score": 0.6440052700922266,
+          "support": 1686.0
+        },
+        "accuracy": 0.6267520332237412,
+        "macro avg": {
+          "precision": 0.5556047846675678,
+          "recall": 0.5399269363714857,
+          "f1-score": 0.49472190945790456,
+          "support": 5779.0
+        },
+        "weighted avg": {
+          "precision": 0.5846413692177985,
+          "recall": 0.6267520332237412,
+          "f1-score": 0.5662519160695281,
           "support": 5779.0
         }
       }
@@ -255,6 +319,70 @@
           "precision": 0.5799743942311026,
           "recall": 0.6032185499221319,
           "f1-score": 0.5871654785413337,
+          "support": 5779.0
+        }
+      }
+    },
+    "xgboost": {
+      "file": "xgboost.pkl",
+      "accuracy": 0.6270981138605295,
+      "balanced_accuracy": 0.5373272757305733,
+      "log_loss": 0.8259234428405762,
+      "macro_f1": 0.48367838514673395,
+      "confusion_matrix": {
+        "labels": [
+          "Home Win",
+          "Draw",
+          "Away Win"
+        ],
+        "rows_actual_columns_predicted": [
+          [
+            2346,
+            43,
+            382
+          ],
+          [
+            746,
+            45,
+            531
+          ],
+          [
+            442,
+            11,
+            1233
+          ]
+        ]
+      },
+      "classification_report": {
+        "Home Win": {
+          "precision": 0.6638370118845501,
+          "recall": 0.8466257668711656,
+          "f1-score": 0.7441712926249009,
+          "support": 2771.0
+        },
+        "Draw": {
+          "precision": 0.45454545454545453,
+          "recall": 0.0340393343419062,
+          "f1-score": 0.0633356790992259,
+          "support": 1322.0
+        },
+        "Away Win": {
+          "precision": 0.5745573159366263,
+          "recall": 0.7313167259786477,
+          "f1-score": 0.6435281837160751,
+          "support": 1686.0
+        },
+        "accuracy": 0.6270981138605295,
+        "macro avg": {
+          "precision": 0.564313260788877,
+          "recall": 0.5373272757305733,
+          "f1-score": 0.48367838514673395,
+          "support": 5779.0
+        },
+        "weighted avg": {
+          "precision": 0.5899126294359459,
+          "recall": 0.6270981138605295,
+          "f1-score": 0.5590615915172313,
           "support": 5779.0
         }
       }
