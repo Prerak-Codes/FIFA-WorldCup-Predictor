@@ -8,7 +8,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 PROCESSED_DATA = BASE_DIR / "data" / "processed"
@@ -31,14 +31,31 @@ def load_training_data():
 
 
 def build_model_pipeline():
-    numeric_features = ["match_year", "elo_diff", "rank_diff", "home_advantage"]
+    numeric_features = [
+        "match_year",
+        "elo_diff",
+        "rank_diff",
+        "home_advantage",
+        "h2h_win_rate_diff",
+        "h2h_total_matches",
+        "form_win_rate_diff",
+        "form_goal_diff",
+        "overall_diff",
+        "attack_diff",
+        "defense_diff",
+        "is_world_cup",
+        "is_continental",
+    ]
     categorical_features = ["home_team", "away_team", "tournament"]
 
     preprocessor = ColumnTransformer(
         transformers=[
             (
                 "numeric",
-                Pipeline([("imputer", SimpleImputer(strategy="median"))]),
+                Pipeline([
+                    ("imputer", SimpleImputer(strategy="median")),
+                    ("scaler", StandardScaler()),
+                ]),
                 numeric_features,
             ),
             (
@@ -82,7 +99,24 @@ def train_and_evaluate():
     df = df.dropna(subset=["elo_diff", "rank_diff", "home_advantage"]).copy()
     df["match_year"] = df["date"].dt.year
 
-    feature_columns = ["match_year", "home_team", "away_team", "tournament", "elo_diff", "rank_diff", "home_advantage"]
+    feature_columns = [
+        "match_year",
+        "home_team",
+        "away_team",
+        "tournament",
+        "elo_diff",
+        "rank_diff",
+        "home_advantage",
+        "h2h_win_rate_diff",
+        "h2h_total_matches",
+        "form_win_rate_diff",
+        "form_goal_diff",
+        "overall_diff",
+        "attack_diff",
+        "defense_diff",
+        "is_world_cup",
+        "is_continental",
+    ]
     target_column = "match_result_encoded"
 
     X = df[feature_columns]

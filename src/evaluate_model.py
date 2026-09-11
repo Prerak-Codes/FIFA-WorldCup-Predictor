@@ -32,6 +32,15 @@ def evaluate_saved_model():
         "elo_diff",
         "rank_diff",
         "home_advantage",
+        "h2h_win_rate_diff",
+        "h2h_total_matches",
+        "form_win_rate_diff",
+        "form_goal_diff",
+        "overall_diff",
+        "attack_diff",
+        "defense_diff",
+        "is_world_cup",
+        "is_continental",
     ]
     X = df[feature_columns]
     y = df["match_result_encoded"]
