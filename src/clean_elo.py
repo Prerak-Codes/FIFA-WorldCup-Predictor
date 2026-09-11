@@ -39,7 +39,7 @@ def clean_elo(df: pd.DataFrame) -> pd.DataFrame:
     # -----------------------------
     # Remove extra spaces from team names
     # -----------------------------
-    df["team"] = df["team"].str.strip()
+    df["team"] = df["team"].str.replace("\xa0", " ").str.strip()
 
     # -----------------------------
     # Convert numeric columns
