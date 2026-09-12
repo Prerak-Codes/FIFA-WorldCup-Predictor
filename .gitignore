@@ -28,3 +28,6 @@ models/*.joblib
 
 # Logs
 *.log
+
+# Prompt & Agent task files
+*Agent_Prompt*.md
