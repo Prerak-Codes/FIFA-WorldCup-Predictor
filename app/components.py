@@ -3,7 +3,18 @@ UI Components and Design System for FIFA World Cup Predictor.
 Provides modern football analytics styling, custom cards, and layout helpers.
 """
 
+import re
 from typing import Dict, Any, List
+
+def clean_html(html: str) -> str:
+    """
+    Removes HTML comments, strips leading/trailing spaces from each line,
+    and collapses newlines so Streamlit never interprets indented HTML as markdown code blocks.
+    """
+    html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
+    lines = [line.strip() for line in html.strip().splitlines() if line.strip()]
+    return "".join(lines)
+
 
 # ── Country Flag Mapping ──────────────────────────────────────────────────────
 TEAM_FLAGS = {
@@ -75,9 +86,8 @@ def get_team_label(team: str) -> str:
 
 
 # ── CSS Design System ─────────────────────────────────────────────────────────
-CSS_THEME = """
+CSS_THEME = clean_html("""
 <style>
-/* ─── Global Reset & Typography ────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"], .stApp {
@@ -86,7 +96,6 @@ html, body, [class*="css"], .stApp {
     color: #F3F4F6 !important;
 }
 
-/* ─── Streamlit Branding & Toolbar Removal ─────────────────────────────────── */
 #MainMenu { visibility: hidden !important; display: none !important; }
 footer { visibility: hidden !important; display: none !important; }
 header[data-testid="stHeader"] {
@@ -99,7 +108,6 @@ header[data-testid="stHeader"] {
 [data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stStatusWidget"] { display: none !important; }
 
-/* ─── Sidebar Styling ──────────────────────────────────────────────────────── */
 [data-testid="stSidebar"] {
     background-color: #0D131F !important;
     border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -110,7 +118,6 @@ div[data-testid="stStatusWidget"] { display: none !important; }
     margin: 1.2rem 0 !important;
 }
 
-/* ─── Navigation Tabs ──────────────────────────────────────────────────────── */
 .stTabs [data-baseweb="tab-list"] {
     gap: 8px !important;
     background-color: #111827 !important;
@@ -145,20 +152,6 @@ div[data-testid="stStatusWidget"] { display: none !important; }
 .stTabs [data-baseweb="tab-border"] { display: none !important; }
 .stTabs [data-baseweb="tab-highlight"] { display: none !important; }
 
-/* ─── Card Containers & Surfaces ───────────────────────────────────────────── */
-.analytics-card {
-    background-color: #111827;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-.analytics-card:hover {
-    border-color: rgba(16, 185, 129, 0.3);
-}
-
-/* ─── Metric Tiles ─────────────────────────────────────────────────────────── */
 div[data-testid="stMetric"] {
     background-color: #111827 !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -179,7 +172,6 @@ div[data-testid="stMetricValue"] {
     font-weight: 700 !important;
 }
 
-/* ─── Form Controls & Inputs ───────────────────────────────────────────────── */
 div[data-baseweb="select"] > div {
     background-color: #111827 !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -196,7 +188,6 @@ div[data-baseweb="input"] > div {
     border-radius: 10px !important;
 }
 
-/* ─── Primary Buttons ──────────────────────────────────────────────────────── */
 .stButton > button[kind="primary"] {
     background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
     color: #FFFFFF !important;
@@ -227,7 +218,6 @@ div[data-baseweb="input"] > div {
     border-color: rgba(255, 255, 255, 0.22) !important;
 }
 
-/* ─── DataFrames & Tables ──────────────────────────────────────────────────── */
 div[data-testid="stDataFrame"] {
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 12px !important;
@@ -235,12 +225,12 @@ div[data-testid="stDataFrame"] {
     background-color: #111827 !important;
 }
 </style>
-"""
+""")
 
 
 # ── Sidebar Components ────────────────────────────────────────────────────────
 def render_sidebar_header() -> str:
-    return """
+    html = """
     <div style="padding: 10px 4px 20px 4px;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
             <span style="font-size: 2rem;">🏆</span>
@@ -258,10 +248,11 @@ def render_sidebar_header() -> str:
         </div>
     </div>
     """
+    return clean_html(html)
 
 
 def render_sidebar_model_specs() -> str:
-    return """
+    html = """
     <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
         <div style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px;">
             Engine Benchmarks
@@ -284,6 +275,7 @@ def render_sidebar_model_specs() -> str:
         </div>
     </div>
     """
+    return clean_html(html)
 
 
 # ── Prediction Hero Components ────────────────────────────────────────────────
@@ -322,7 +314,7 @@ def render_prediction_hero(
 
     venue_text = "Neutral Ground Matchup" if is_neutral else f"Home Field: {home_team}"
 
-    return f"""
+    html = f"""
     <div style="background: {bg_gradient}; border: 1px solid {border_color}; border-radius: 16px; padding: 22px 26px; margin: 20px 0 24px 0; box-shadow: 0 8px 30px rgba(0,0,0,0.35);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <div style="font-size: 0.76rem; font-weight: 700; color: {status_color}; letter-spacing: 0.1em; text-transform: uppercase;">
@@ -340,49 +332,45 @@ def render_prediction_hero(
         </div>
     </div>
     """
+    return clean_html(html)
 
 
 def render_probability_cards(
     home_team: str, away_team: str, p_home: float, p_draw: float, p_away: float
 ) -> str:
-    """3 sleek cards displaying Win/Draw/Loss probabilities."""
+    """3 sleek cards displaying Win/Draw/Loss probabilities without any raw markdown text."""
     home_flag = get_flag(home_team)
     away_flag = get_flag(away_team)
 
-    return f"""
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-        <!-- Home Win Card -->
-        <div style="background: #111827; border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 14px; padding: 18px 20px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #34D399; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px;">
+    html = f"""
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div style="background: #111827; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 14px; padding: 20px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #34D399; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;">
                 {home_flag} {home_team} Win
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+            <div style="font-size: 2.3rem; font-weight: 800; color: #F8FAFC; margin-bottom: 10px; line-height: 1;">
                 {p_home:.1%}
             </div>
             <div style="background: rgba(255,255,255,0.08); border-radius: 10px; height: 6px; overflow: hidden;">
                 <div style="background: #10B981; width: {p_home*100:.1f}%; height: 100%;"></div>
             </div>
         </div>
-
-        <!-- Draw Card -->
-        <div style="background: #111827; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 14px; padding: 18px 20px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px;">
+        <div style="background: #111827; border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 14px; padding: 20px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;">
                 ⚖️ Draw Outcome
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+            <div style="font-size: 2.3rem; font-weight: 800; color: #F8FAFC; margin-bottom: 10px; line-height: 1;">
                 {p_draw:.1%}
             </div>
             <div style="background: rgba(255,255,255,0.08); border-radius: 10px; height: 6px; overflow: hidden;">
                 <div style="background: #64748B; width: {p_draw*100:.1f}%; height: 100%;"></div>
             </div>
         </div>
-
-        <!-- Away Win Card -->
-        <div style="background: #111827; border: 1px solid rgba(244, 63, 94, 0.25); border-radius: 14px; padding: 18px 20px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #FB7185; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px;">
+        <div style="background: #111827; border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 14px; padding: 20px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #FB7185; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;">
                 {away_flag} {away_team} Win
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #F8FAFC; margin-bottom: 8px;">
+            <div style="font-size: 2.3rem; font-weight: 800; color: #F8FAFC; margin-bottom: 10px; line-height: 1;">
                 {p_away:.1%}
             </div>
             <div style="background: rgba(255,255,255,0.08); border-radius: 10px; height: 6px; overflow: hidden;">
@@ -391,6 +379,7 @@ def render_probability_cards(
         </div>
     </div>
     """
+    return clean_html(html)
 
 
 # ── Team Profile Preview Cards ────────────────────────────────────────────────
@@ -405,7 +394,7 @@ def render_team_preview_card(team: str, profile: Dict[str, Any], is_home: bool) 
     badge_label = "TEAM A (HOME)" if is_home else "TEAM B (AWAY)"
     badge_color = "#10B981" if is_home else "#38BDF8"
 
-    return f"""
+    html = f"""
     <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-top: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="font-size: 0.72rem; font-weight: 700; color: {badge_color}; letter-spacing: 0.08em; text-transform: uppercase;">
@@ -439,6 +428,7 @@ def render_team_preview_card(team: str, profile: Dict[str, Any], is_home: bool) 
         </div>
     </div>
     """
+    return clean_html(html)
 
 
 # ── Tournament & Bracket Helpers ──────────────────────────────────────────────
@@ -448,7 +438,7 @@ def render_champion_banner(champion: str, runner_up: str, third: str) -> str:
     run_flag = get_flag(runner_up)
     third_flag = get_flag(third)
 
-    return f"""
+    html = f"""
     <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(17, 24, 39, 0.95) 100%); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 16px; padding: 24px; margin: 24px 0; text-align: center; box-shadow: 0 8px 32px rgba(245, 158, 11, 0.2);">
         <div style="font-size: 0.8rem; font-weight: 700; color: #F59E0B; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;">
             🏆 WORLD CUP CHAMPION
@@ -462,3 +452,4 @@ def render_champion_banner(champion: str, runner_up: str, third: str) -> str:
         </div>
     </div>
     """
+    return clean_html(html)

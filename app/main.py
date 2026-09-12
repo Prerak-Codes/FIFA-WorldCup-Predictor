@@ -30,6 +30,7 @@ from app.utils import (
 )
 from app.components import (
     CSS_THEME,
+    clean_html,
     get_flag,
     get_team_label,
     render_sidebar_header,
@@ -65,7 +66,7 @@ with st.sidebar:
     st.markdown(render_sidebar_model_specs(), unsafe_allow_html=True)
 
     st.markdown(
-        """
+        clean_html("""
         <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
             <div style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
                 Platform Modules
@@ -76,7 +77,7 @@ with st.sidebar:
                 <div style="margin-top: 6px;">📊 <strong>Team Explorer:</strong> Historical Elo progression & squad attribute profiles.</div>
             </div>
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
@@ -85,7 +86,7 @@ with st.sidebar:
 
 # ── Top Hero Header ───────────────────────────────────────────────────────────
 st.markdown(
-    """
+    clean_html("""
     <div style="margin-bottom: 20px;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
             <span style="background: rgba(16,185,129,0.15); color: #34D399; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase;">
@@ -98,7 +99,7 @@ st.markdown(
             FIFA World Cup Prediction Platform
         </div>
     </div>
-    """,
+    """),
     unsafe_allow_html=True,
 )
 
@@ -115,11 +116,11 @@ tab1, tab2, tab3 = st.tabs([
 # ═════════════════════════════════════════════════════════════════════════════
 with tab1:
     st.markdown(
-        """
+        clean_html("""
         <div style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 18px;">
             Select two competing national teams to calculate match outcome probabilities based on Elo differentials, FIFA squad ratings, and recent international form.
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
@@ -140,13 +141,13 @@ with tab1:
 
     with col_vs:
         st.markdown(
-            """
+            clean_html("""
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding-top: 50px;">
                 <div style="background: linear-gradient(135deg, #1E293B 0%, #111827 100%); border: 2px solid rgba(255,255,255,0.12); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
                     <span style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC; letter-spacing: 0.05em;">VS</span>
                 </div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
 
@@ -167,11 +168,11 @@ with tab1:
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     with st.container():
         st.markdown(
-            """
+            clean_html("""
             <div style="font-size: 0.76rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
                 Match Context & Venue Settings
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
         col_opt1, col_opt2, col_opt3 = st.columns([1, 1.5, 1])
@@ -188,8 +189,30 @@ with tab1:
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     predict_btn = st.button("⚡ Calculate Match Forecast", type="primary", use_container_width=True)
 
-    # Run Prediction
-    p_home, p_draw, p_away = predict_matchup(sim, home_team, away_team, is_neutral, tournament, match_year)
+    # ── Calculation State & Execution ──
+    calc_key = (home_team, away_team, is_neutral, tournament, match_year)
+
+    if predict_btn or "last_forecast" not in st.session_state:
+        with st.spinner(f"Evaluating XGBoost match dynamics for {home_team} vs {away_team}…"):
+            p_h, p_d, p_a = predict_matchup(sim, home_team, away_team, is_neutral, tournament, match_year)
+            st.session_state["last_forecast"] = {
+                "key": calc_key,
+                "probs": (p_h, p_d, p_a),
+            }
+        if predict_btn:
+            st.toast(f"Forecast updated: {home_team} vs {away_team}", icon="⚡")
+    else:
+        # If user altered selections without clicking button yet, keep reactive update
+        if st.session_state["last_forecast"]["key"] != calc_key:
+            p_h, p_d, p_a = predict_matchup(sim, home_team, away_team, is_neutral, tournament, match_year)
+            st.session_state["last_forecast"] = {
+                "key": calc_key,
+                "probs": (p_h, p_d, p_a),
+            }
+        else:
+            p_h, p_d, p_a = st.session_state["last_forecast"]["probs"]
+
+    p_home, p_draw, p_away = st.session_state["last_forecast"]["probs"]
 
     # ── High-Impact Prediction Results ────────────────────────────────────────
     st.markdown(render_prediction_hero(home_team, away_team, p_home, p_draw, p_away, is_neutral), unsafe_allow_html=True)
@@ -199,22 +222,22 @@ with tab1:
 
     # Probability Distribution Meter
     st.markdown(
-        """
+        clean_html("""
         <div style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;">
             Probability Distribution Breakdown
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
     st.plotly_chart(prob_bar_chart(home_team, away_team, p_home, p_draw, p_away), use_container_width=True)
 
     # Head-to-Head Comparison Matrix
     st.markdown(
-        """
+        clean_html("""
         <div style="font-size: 1rem; font-weight: 700; color: #F8FAFC; margin: 28px 0 12px 0;">
             📊 Head-to-Head Metric Comparison
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
@@ -274,11 +297,11 @@ with tab1:
 # ═════════════════════════════════════════════════════════════════════════════
 with tab2:
     st.markdown(
-        """
+        clean_html("""
         <div style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 18px;">
             Simulate the entire 32-team FIFA World Cup tournament using calibrated match win probabilities, group tiebreaker rules, and knockout penalty shootout models.
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
@@ -317,11 +340,11 @@ with tab2:
 
             # Group Stage Standings
             st.markdown(
-                """
+                clean_html("""
                 <div style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin: 24px 0 12px 0;">
                     🔵 Group Stage Qualifiers
                 </div>
-                """,
+                """),
                 unsafe_allow_html=True,
             )
 
@@ -340,14 +363,14 @@ with tab2:
                             items_html.append(f"<div style='color: #64748B; padding: 3px 0; text-decoration: line-through;'>{flag} {t}</div>")
 
                     st.markdown(
-                        f"""
+                        clean_html(f"""
                         <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
                             <div style="font-size: 0.8rem; font-weight: 700; color: #10B981; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
                                 Group {grp}
                             </div>
                             {''.join(items_html)}
                         </div>
-                        """,
+                        """),
                         unsafe_allow_html=True,
                     )
 
@@ -355,11 +378,11 @@ with tab2:
 
             # Knockout Bracket
             st.markdown(
-                """
+                clean_html("""
                 <div style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin: 16px 0 16px 0;">
                     ⚔️ Knockout Stage Progression
                 </div>
-                """,
+                """),
                 unsafe_allow_html=True,
             )
 
@@ -367,7 +390,7 @@ with tab2:
             r16 = res["r16"]
 
             with kn_cols[0]:
-                st.markdown("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Round of 16</div>", unsafe_allow_html=True)
+                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Round of 16</div>"), unsafe_allow_html=True)
                 for i in range(0, len(r16), 2):
                     t1, t2 = r16[i], r16[i + 1]
                     winner = t1 if t1 in res["qf"] else t2
@@ -376,7 +399,7 @@ with tab2:
                     w1_mark = "✔" if winner == t1 else ""
                     w2_mark = "✔" if winner == t2 else ""
                     st.markdown(
-                        f"""
+                        clean_html(f"""
                         <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;">
                             <div style="color: {c1}; font-weight: {'700' if winner==t1 else '500'}; display: flex; justify-content: space-between;">
                                 <span>{get_flag(t1)} {t1}</span><span>{w1_mark}</span>
@@ -385,12 +408,12 @@ with tab2:
                                 <span>{get_flag(t2)} {t2}</span><span>{w2_mark}</span>
                             </div>
                         </div>
-                        """,
+                        """),
                         unsafe_allow_html=True,
                     )
 
             with kn_cols[1]:
-                st.markdown("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Quarter-Finals</div>", unsafe_allow_html=True)
+                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Quarter-Finals</div>"), unsafe_allow_html=True)
                 qf = res["qf"]
                 for i in range(0, len(qf), 2):
                     t1, t2 = qf[i], qf[i + 1]
@@ -400,7 +423,7 @@ with tab2:
                     w1_mark = "✔" if winner == t1 else ""
                     w2_mark = "✔" if winner == t2 else ""
                     st.markdown(
-                        f"""
+                        clean_html(f"""
                         <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; margin-bottom: 24px;">
                             <div style="color: {c1}; font-weight: {'700' if winner==t1 else '500'}; display: flex; justify-content: space-between;">
                                 <span>{get_flag(t1)} {t1}</span><span>{w1_mark}</span>
@@ -409,12 +432,12 @@ with tab2:
                                 <span>{get_flag(t2)} {t2}</span><span>{w2_mark}</span>
                             </div>
                         </div>
-                        """,
+                        """),
                         unsafe_allow_html=True,
                     )
 
             with kn_cols[2]:
-                st.markdown("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Semi-Finals</div>", unsafe_allow_html=True)
+                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Semi-Finals</div>"), unsafe_allow_html=True)
                 sf = res["sf"]
                 for i in range(0, len(sf), 2):
                     t1, t2 = sf[i], sf[i + 1]
@@ -424,7 +447,7 @@ with tab2:
                     w1_mark = "✔" if winner == t1 else ""
                     w2_mark = "✔" if winner == t2 else ""
                     st.markdown(
-                        f"""
+                        clean_html(f"""
                         <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-bottom: 48px;">
                             <div style="color: {c1}; font-weight: {'700' if winner==t1 else '500'}; display: flex; justify-content: space-between;">
                                 <span>{get_flag(t1)} {t1}</span><span>{w1_mark}</span>
@@ -433,18 +456,18 @@ with tab2:
                                 <span>{get_flag(t2)} {t2}</span><span>{w2_mark}</span>
                             </div>
                         </div>
-                        """,
+                        """),
                         unsafe_allow_html=True,
                     )
 
             with kn_cols[3]:
-                st.markdown("<div style='font-size: 0.85rem; font-weight: 700; color: #F59E0B; text-transform: uppercase; margin-bottom: 12px;'>World Cup Final</div>", unsafe_allow_html=True)
+                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #F59E0B; text-transform: uppercase; margin-bottom: 12px;'>World Cup Final</div>"), unsafe_allow_html=True)
                 t1, t2 = res["final"]
                 champ = res["champion"]
                 c1 = "#10B981" if champ == t1 else "#64748B"
                 c2 = "#10B981" if champ == t2 else "#64748B"
                 st.markdown(
-                    f"""
+                    clean_html(f"""
                     <div style="background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, #111827 100%); border: 1px solid rgba(245,158,11,0.35); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
                         <div style="color: {c1}; font-weight: {'800' if champ==t1 else '500'}; display: flex; justify-content: space-between; font-size: 1.05rem;">
                             <span>{get_flag(t1)} {t1}</span><span>{'🏆' if champ==t1 else ''}</span>
@@ -453,28 +476,28 @@ with tab2:
                             <span>{get_flag(t2)} {t2}</span><span>{'🏆' if champ==t2 else ''}</span>
                         </div>
                     </div>
-                    """,
+                    """),
                     unsafe_allow_html=True,
                 )
 
-                st.markdown("<div style='font-size: 0.85rem; font-weight: 700; color: #D97706; text-transform: uppercase; margin-bottom: 8px;'>3rd Place Playoff</div>", unsafe_allow_html=True)
+                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #D97706; text-transform: uppercase; margin-bottom: 8px;'>3rd Place Playoff</div>"), unsafe_allow_html=True)
                 st.markdown(
-                    f"""
+                    clean_html(f"""
                     <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px;">
                         <div style="color: #F8FAFC; font-weight: 600;">🥉 {get_flag(res['third'])} {res['third']}</div>
                     </div>
-                    """,
+                    """),
                     unsafe_allow_html=True,
                 )
 
     # ── Sub-tab 2: Monte Carlo Leaderboard ──
     with sub2:
         st.markdown(
-            """
+            clean_html("""
             <div style="color: #94A3B8; font-size: 0.92rem; margin-bottom: 16px;">
                 Aggregated stage advancement and championship probabilities derived from <strong>10,000 full Monte Carlo tournament simulations</strong>.
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
 
@@ -496,11 +519,11 @@ with tab2:
         if display_df is not None:
             # Championship Probability Bar Chart
             st.markdown(
-                """
+                clean_html("""
                 <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
                     🏆 Top 16 Championship Favorites
                 </div>
-                """,
+                """),
                 unsafe_allow_html=True,
             )
 
@@ -536,11 +559,11 @@ with tab2:
 
             # Stage Progression Heatmap
             st.markdown(
-                """
+                clean_html("""
                 <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 28px 0 8px 0;">
                     📊 Stage-by-Stage Progression Matrix (%)
                 </div>
-                """,
+                """),
                 unsafe_allow_html=True,
             )
 
@@ -570,11 +593,11 @@ with tab2:
 
             # Full Leaderboard Table
             st.markdown(
-                """
+                clean_html("""
                 <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 24px 0 8px 0;">
                     📋 Complete Tournament Leaderboard (All 32 Nations)
                 </div>
-                """,
+                """),
                 unsafe_allow_html=True,
             )
             table_df = display_df.copy()
@@ -595,11 +618,11 @@ with tab2:
 # ═════════════════════════════════════════════════════════════════════════════
 with tab3:
     st.markdown(
-        """
+        clean_html("""
         <div style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 18px;">
             Inspect historical Elo trajectory over football history (1872–2026) and analyze multidimensional radar attributes for international squads.
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
@@ -616,11 +639,11 @@ with tab3:
     else:
         # Elo Rating Progression Line Chart
         st.markdown(
-            """
+            clean_html("""
             <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
                 📈 Historical Elo Rating Progression
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
 
@@ -650,11 +673,11 @@ with tab3:
 
         # Team Radar Profile (Current Season)
         st.markdown(
-            """
+            clean_html("""
             <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
                 🕸️ Squad Attribute Radar Profile (Current Season)
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
 
@@ -711,11 +734,11 @@ with tab3:
 
         # Current Squad Metric Table
         st.markdown(
-            """
+            clean_html("""
             <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
                 📋 Current Squad Performance Specifications
             </div>
-            """,
+            """),
             unsafe_allow_html=True,
         )
 
