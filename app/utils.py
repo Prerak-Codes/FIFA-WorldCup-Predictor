@@ -22,7 +22,7 @@ from src.simulate_tournament import TournamentSimulator, DEFAULT_GROUPS
 
 # ── Cached resource loaders ──────────────────────────────────────────────────
 
-@st.cache_resource(show_spinner="Loading model and team data…")
+@st.cache_resource(show_spinner="Initializing prediction engine…")
 def load_simulator() -> TournamentSimulator:
     sim = TournamentSimulator(
         model_path=str(BASE_DIR / "models" / "best_model.pkl"),
@@ -33,21 +33,21 @@ def load_simulator() -> TournamentSimulator:
     return sim
 
 
-@st.cache_data(show_spinner="Loading Elo history…")
+@st.cache_data(show_spinner="Loading Elo ratings…")
 def load_elo_history() -> pd.DataFrame:
     df = pd.read_csv(BASE_DIR / "data" / "interim" / "elo_clean.csv")
     df["date"] = pd.to_datetime(df["date"])
     return df
 
 
-@st.cache_data(show_spinner="Loading match results…")
+@st.cache_data(show_spinner="Loading match database…")
 def load_results() -> pd.DataFrame:
     df = pd.read_csv(BASE_DIR / "data" / "interim" / "results_clean.csv")
     df["date"] = pd.to_datetime(df["date"])
     return df
 
 
-@st.cache_data(show_spinner="Loading simulation results…")
+@st.cache_data(show_spinner="Loading simulation models…")
 def load_simulation_csv() -> Optional[pd.DataFrame]:
     p = BASE_DIR / "data" / "predictions" / "world_cup_simulation_summary.csv"
     if p.exists():
@@ -55,7 +55,7 @@ def load_simulation_csv() -> Optional[pd.DataFrame]:
     return None
 
 
-# ── Helper functions ──────────────────────────────────────────────────────────
+# ── Matchup Inference Engine ──────────────────────────────────────────────────
 
 def predict_matchup(
     sim: TournamentSimulator,
@@ -128,42 +128,75 @@ def predict_matchup(
 
 
 def prob_bar_chart(home: str, away: str, p_home: float, p_draw: float, p_away: float) -> go.Figure:
-    """Horizontal stacked bar chart of Win/Draw/Loss probabilities."""
+    """Modern dark-themed horizontal stacked bar chart of Win/Draw/Loss probabilities."""
     fig = go.Figure()
+
     fig.add_trace(go.Bar(
         name=f"{home} Win",
         x=[round(p_home * 100, 1)],
         y=["Probability"],
         orientation="h",
-        marker_color="#1a9e3f",
+        marker=dict(color="#10B981", line=dict(color="rgba(255,255,255,0.15)", width=1)),
         text=[f"{p_home:.1%}"],
         textposition="inside",
+        insidetextanchor="middle",
+        textfont=dict(color="#FFFFFF", size=13, family="Inter, sans-serif"),
+        hovertemplate=f"<b>{home} Win</b>: {p_home:.1%}<extra></extra>",
     ))
+
     fig.add_trace(go.Bar(
         name="Draw",
         x=[round(p_draw * 100, 1)],
         y=["Probability"],
         orientation="h",
-        marker_color="#aaaaaa",
+        marker=dict(color="#64748B", line=dict(color="rgba(255,255,255,0.15)", width=1)),
         text=[f"{p_draw:.1%}"],
         textposition="inside",
+        insidetextanchor="middle",
+        textfont=dict(color="#FFFFFF", size=13, family="Inter, sans-serif"),
+        hovertemplate=f"<b>Draw</b>: {p_draw:.1%}<extra></extra>",
     ))
+
     fig.add_trace(go.Bar(
         name=f"{away} Win",
         x=[round(p_away * 100, 1)],
         y=["Probability"],
         orientation="h",
-        marker_color="#c0392b",
+        marker=dict(color="#F43F5E", line=dict(color="rgba(255,255,255,0.15)", width=1)),
         text=[f"{p_away:.1%}"],
         textposition="inside",
+        insidetextanchor="middle",
+        textfont=dict(color="#FFFFFF", size=13, family="Inter, sans-serif"),
+        hovertemplate=f"<b>{away} Win</b>: {p_away:.1%}<extra></extra>",
     ))
+
     fig.update_layout(
+        template="plotly_dark",
         barmode="stack",
-        height=120,
-        margin=dict(l=10, r=10, t=10, b=10),
-        legend=dict(orientation="h", y=-0.3),
-        xaxis=dict(range=[0, 100], title="Probability (%)"),
-        yaxis=dict(showticklabels=False),
+        height=85,
+        margin=dict(l=0, r=0, t=10, b=10),
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.05,
+            xanchor="center",
+            x=0.5,
+            font=dict(color="#CBD5E1", size=12),
+        ),
+        xaxis=dict(
+            range=[0, 100],
+            showgrid=False,
+            zeroline=False,
+            showticklabels=False,
+            fixedrange=True,
+        ),
+        yaxis=dict(
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False,
+            fixedrange=True,
+        ),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
     )
