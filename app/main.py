@@ -28,24 +28,10 @@ from app.utils import (
     predict_matchup,
     prob_bar_chart,
 )
-import re
-
-def clean_html(html: str) -> str:
-    """Removes HTML comments, strips whitespace, and collapses newlines."""
-    html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
-    lines = [line.strip() for line in html.strip().splitlines() if line.strip()]
-    return "".join(lines)
-
 from app.components import (
     CSS_THEME,
     get_flag,
     get_team_label,
-    render_sidebar_header,
-    render_sidebar_model_specs,
-    render_prediction_hero,
-    render_probability_cards,
-    render_team_preview_card,
-    render_champion_banner,
 )
 from src.simulate_tournament import DEFAULT_GROUPS
 
@@ -57,7 +43,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Inject Modern Sports Analytics Theme
+# Inject Clean Styles (Hides deploy button and chrome)
 st.markdown(CSS_THEME, unsafe_allow_html=True)
 
 # ── Initialize Prediction Engine ──────────────────────────────────────────────
@@ -69,46 +55,32 @@ ELO_TEAMS = sorted(elo_df["team"].unique().tolist())
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown(render_sidebar_header(), unsafe_allow_html=True)
-    st.markdown(render_sidebar_model_specs(), unsafe_allow_html=True)
+    st.title("🏆 FIFA World Cup")
+    st.subheader("2026 Analytics Platform")
+    st.caption("Calibrated Machine Learning Match & Tournament Forecasting")
 
-    st.markdown(
-        clean_html("""
-        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-            <div style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
-                Platform Modules
-            </div>
-            <div style="font-size: 0.82rem; color: #CBD5E1; line-height: 1.6;">
-                <div>⚔️ <strong>Match Forecaster:</strong> Win/Draw/Loss probabilities calibrated by international Elo & FIFA rankings.</div>
-                <div style="margin-top: 6px;">🏆 <strong>Tournament Engine:</strong> Full 32-team World Cup simulation with Monte Carlo depth.</div>
-                <div style="margin-top: 6px;">📊 <strong>Team Explorer:</strong> Historical Elo progression & squad attribute profiles.</div>
-            </div>
-        </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    st.divider()
 
-    st.caption("FIFA World Cup Analytics Platform · 2026 Edition")
+    with st.container(border=True):
+        st.markdown("**ENGINE BENCHMARKS**")
+        col_b1, col_b2 = st.columns(2)
+        col_b1.metric("Holdout Acc", "62.71%")
+        col_b2.metric("Log Loss", "0.8219")
+        st.caption("Trained on 49,500+ international matches (1872–2026). Tested on holdout fixtures.")
 
+    st.divider()
+
+    with st.container(border=True):
+        st.markdown("**PLATFORM MODULES**")
+        st.markdown("⚔️ **Match Predictor**: Pairwise Win/Draw/Loss probabilities")
+        st.markdown("🏆 **Tournament Engine**: 32-team World Cup simulation")
+        st.markdown("📊 **Team Explorer**: Historical Elo ratings & squad radar profiles")
+
+    st.caption("Production Edition · 2026 World Cup")
 
 # ── Top Hero Header ───────────────────────────────────────────────────────────
-st.markdown(
-    clean_html("""
-    <div style="margin-bottom: 20px;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <span style="background: rgba(16,185,129,0.15); color: #34D399; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase;">
-                Tournament Forecast Engine
-            </span>
-            <span style="color: #64748B; font-size: 0.8rem;">·</span>
-            <span style="color: #94A3B8; font-size: 0.8rem;">49,500+ Matches Analyzed</span>
-        </div>
-        <div style="font-size: 2rem; font-weight: 800; color: #F8FAFC; letter-spacing: -0.02em;">
-            FIFA World Cup Prediction Platform
-        </div>
-    </div>
-    """),
-    unsafe_allow_html=True,
-)
+st.title("⚽ FIFA World Cup Prediction Platform")
+st.caption("AI-Powered International Football Analytics & Tournament Monte Carlo Simulation")
 
 # ── Primary Navigation Tabs ───────────────────────────────────────────────────
 tab1, tab2, tab3 = st.tabs([
@@ -122,14 +94,7 @@ tab1, tab2, tab3 = st.tabs([
 # TAB 1: Head-to-Head Match Predictor
 # ═════════════════════════════════════════════════════════════════════════════
 with tab1:
-    st.markdown(
-        clean_html("""
-        <div style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 18px;">
-            Select two competing national teams to calculate match outcome probabilities based on Elo differentials, FIFA squad ratings, and recent international form.
-        </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    st.markdown("Select two national teams to evaluate match outcome probabilities using our calibrated XGBoost model.")
 
     # Team Selection Section
     col1, col_vs, col2 = st.columns([5, 2, 5])
@@ -137,51 +102,48 @@ with tab1:
     with col1:
         home_idx = ALL_TEAMS.index("Spain") if "Spain" in ALL_TEAMS else 0
         home_team = st.selectbox(
-            "Select Team A (Home / Selected)",
+            "Team A (Home / Selected)",
             options=ALL_TEAMS,
             index=home_idx,
             format_func=get_team_label,
             key="h2h_home",
         )
         home_profile = sim.team_profiles.get(home_team, {})
-        st.markdown(render_team_preview_card(home_team, home_profile, is_home=True), unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown(f"### {get_flag(home_team)} {home_team}")
+            st.caption("TEAM A · HOME / SELECTED")
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Elo", f"{home_profile.get('elo', 1500):.0f}")
+            m2.metric("FIFA Rank", f"#{int(home_profile.get('rank', 50))}")
+            m3.metric("Attack", f"{home_profile.get('attack', 72):.1f}")
+            m4.metric("Defense", f"{home_profile.get('defense', 72):.1f}")
 
     with col_vs:
-        st.markdown(
-            clean_html("""
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding-top: 50px;">
-                <div style="background: linear-gradient(135deg, #1E293B 0%, #111827 100%); border: 2px solid rgba(255,255,255,0.12); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                    <span style="font-size: 1.25rem; font-weight: 800; color: #F8FAFC; letter-spacing: 0.05em;">VS</span>
-                </div>
-            </div>
-            """),
-            unsafe_allow_html=True,
-        )
+        st.markdown("<br><br><h1 style='text-align:center;'>VS</h1>", unsafe_allow_html=True)
 
     with col2:
         away_options = [t for t in ALL_TEAMS if t != home_team]
         away_idx = away_options.index("England") if "England" in away_options else 0
         away_team = st.selectbox(
-            "Select Team B (Away / Opponent)",
+            "Team B (Away / Opponent)",
             options=away_options,
             index=away_idx,
             format_func=get_team_label,
             key="h2h_away",
         )
         away_profile = sim.team_profiles.get(away_team, {})
-        st.markdown(render_team_preview_card(away_team, away_profile, is_home=False), unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown(f"### {get_flag(away_team)} {away_team}")
+            st.caption("TEAM B · AWAY / OPPONENT")
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Elo", f"{away_profile.get('elo', 1500):.0f}")
+            m2.metric("FIFA Rank", f"#{int(away_profile.get('rank', 50))}")
+            m3.metric("Attack", f"{away_profile.get('attack', 72):.1f}")
+            m4.metric("Defense", f"{away_profile.get('defense', 72):.1f}")
 
-    # Match Parameters Card
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    with st.container():
-        st.markdown(
-            clean_html("""
-            <div style="font-size: 0.76rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
-                Match Context & Venue Settings
-            </div>
-            """),
-            unsafe_allow_html=True,
-        )
+    # Match Parameters Box
+    with st.container(border=True):
+        st.markdown("**MATCH CONTEXT & VENUE SETTINGS**")
         col_opt1, col_opt2, col_opt3 = st.columns([1, 1.5, 1])
         with col_opt1:
             is_neutral = st.toggle("⚖️ Neutral Ground", value=True, help="Neutral venues eliminate arbitrary home-field scoring advantage.")
@@ -193,10 +155,9 @@ with tab1:
         with col_opt3:
             match_year = st.number_input("Match Year", min_value=2020, max_value=2030, value=2026, step=1)
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     predict_btn = st.button("⚡ Calculate Match Forecast", type="primary", use_container_width=True)
 
-    # ── Calculation State & Execution ──
+    # State & Prediction Computation
     calc_key = (home_team, away_team, is_neutral, tournament, match_year)
 
     if predict_btn or "last_forecast" not in st.session_state:
@@ -207,9 +168,8 @@ with tab1:
                 "probs": (p_h, p_d, p_a),
             }
         if predict_btn:
-            st.toast(f"Forecast updated: {home_team} vs {away_team}", icon="⚡")
+            st.toast(f"Forecast updated: {home_team} vs {away_team}", icon="⚽")
     else:
-        # If user altered selections without clicking button yet, keep reactive update
         if st.session_state["last_forecast"]["key"] != calc_key:
             p_h, p_d, p_a = predict_matchup(sim, home_team, away_team, is_neutral, tournament, match_year)
             st.session_state["last_forecast"] = {
@@ -221,32 +181,54 @@ with tab1:
 
     p_home, p_draw, p_away = st.session_state["last_forecast"]["probs"]
 
-    # ── High-Impact Prediction Results ────────────────────────────────────────
-    st.markdown(render_prediction_hero(home_team, away_team, p_home, p_draw, p_away, is_neutral), unsafe_allow_html=True)
+    st.divider()
 
-    # Probability Metric Cards
-    st.markdown(render_probability_cards(home_team, away_team, p_home, p_draw, p_away), unsafe_allow_html=True)
+    # ── 1. Verdict Banner ──
+    home_flag = get_flag(home_team)
+    away_flag = get_flag(away_team)
+    venue_tag = "Neutral Venue" if is_neutral else f"Home Field: {home_team}"
 
-    # Probability Distribution Meter
-    st.markdown(
-        clean_html("""
-        <div style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;">
-            Probability Distribution Breakdown
-        </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    if p_home > p_away and p_home > p_draw:
+        diff_pct = (p_home - p_away) * 100
+        st.success(f"""### ★ FORECAST: {home_flag} {home_team.upper()} FAVORED TO WIN
+
+Model predicts **{home_team}** has a **{p_home:.1%}** win probability ({diff_pct:+.1f}% advantage over {away_team}) on {venue_tag}.""")
+    elif p_draw > p_home and p_draw > p_away:
+        st.info(f"""### ★ FORECAST: ⚖️ DRAW / BALANCED MATCH EXPECTED
+
+Both teams project closely matched. Draw outcome probability is **{p_draw:.1%}** on {venue_tag}.""")
+    else:
+        diff_pct = (p_away - p_home) * 100
+        st.error(f"""### ★ FORECAST: {away_flag} {away_team.upper()} FAVORED TO WIN
+
+Model predicts **{away_team}** has a **{p_away:.1%}** win probability ({diff_pct:+.1f}% advantage over {home_team}) on {venue_tag}.""")
+
+    # ── 2. Structured Probability Metric Cards (Zero HTML Leakage) ──
+    col_p1, col_p2, col_p3 = st.columns(3)
+
+    with col_p1:
+        with st.container(border=True):
+            st.caption(f"{home_flag} {home_team.upper()} WIN")
+            st.metric(label="Win Probability", value=f"{p_home:.1%}")
+            st.progress(min(max(p_home, 0.0), 1.0))
+
+    with col_p2:
+        with st.container(border=True):
+            st.caption("⚖️ DRAW OUTCOME")
+            st.metric(label="Draw Probability", value=f"{p_draw:.1%}")
+            st.progress(min(max(p_draw, 0.0), 1.0))
+
+    with col_p3:
+        with st.container(border=True):
+            st.caption(f"{away_flag} {away_team.upper()} WIN")
+            st.metric(label="Win Probability", value=f"{p_away:.1%}")
+            st.progress(min(max(p_away, 0.0), 1.0))
+
+    # ── 3. Visual Probability Bar Chart ──
     st.plotly_chart(prob_bar_chart(home_team, away_team, p_home, p_draw, p_away), use_container_width=True)
 
-    # Head-to-Head Comparison Matrix
-    st.markdown(
-        clean_html("""
-        <div style="font-size: 1rem; font-weight: 700; color: #F8FAFC; margin: 28px 0 12px 0;">
-            📊 Head-to-Head Metric Comparison
-        </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    # ── 4. Metric Comparison Matrix ──
+    st.subheader("📊 Head-to-Head Metric Comparison")
 
     p1 = sim.team_profiles.get(home_team, {})
     p2 = sim.team_profiles.get(away_team, {})
@@ -303,14 +285,7 @@ with tab1:
 # TAB 2: World Cup Bracket Simulator
 # ═════════════════════════════════════════════════════════════════════════════
 with tab2:
-    st.markdown(
-        clean_html("""
-        <div style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 18px;">
-            Simulate the entire 32-team FIFA World Cup tournament using calibrated match win probabilities, group tiebreaker rules, and knockout penalty shootout models.
-        </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    st.markdown("Simulate the entire 32-team FIFA World Cup tournament using calibrated match win probabilities, group tiebreakers, and knockout penalty shootout models.")
 
     sub1, sub2 = st.tabs(["🎲 Single Tournament Simulation", "📈 Monte Carlo Leaderboard (10,000 Runs)"])
 
@@ -339,174 +314,82 @@ with tab2:
         if "bracket_result" in st.session_state:
             res = st.session_state["bracket_result"]
 
-            # Champion Spotlight Banner
-            st.markdown(
-                render_champion_banner(res["champion"], res["runner_up"], res["third"]),
-                unsafe_allow_html=True,
-            )
+            # Champion Spotlight Card
+            with st.container(border=True):
+                st.header(f"🏆 Champion: {get_flag(res['champion'])} {res['champion']}")
+                c_run, c_3rd = st.columns(2)
+                c_run.subheader(f"🥈 Runner-Up: {get_flag(res['runner_up'])} {res['runner_up']}")
+                c_3rd.subheader(f"🥉 3rd Place: {get_flag(res['third'])} {res['third']}")
+
+            st.divider()
 
             # Group Stage Standings
-            st.markdown(
-                clean_html("""
-                <div style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin: 24px 0 12px 0;">
-                    🔵 Group Stage Qualifiers
-                </div>
-                """),
-                unsafe_allow_html=True,
-            )
-
+            st.subheader("🔵 Group Stage Qualifiers")
             grp_cols = st.columns(4)
             for idx, (grp, (first, second)) in enumerate(res["group_advancers"].items()):
                 with grp_cols[idx % 4]:
-                    group_teams = DEFAULT_GROUPS[grp]
-                    items_html = []
-                    for t in group_teams:
-                        flag = get_flag(t)
-                        if t == first:
-                            items_html.append(f"<div style='color: #F59E0B; font-weight: 700; padding: 3px 0;'>🥇 {flag} {t}</div>")
-                        elif t == second:
-                            items_html.append(f"<div style='color: #38BDF8; font-weight: 600; padding: 3px 0;'>🥈 {flag} {t}</div>")
-                        else:
-                            items_html.append(f"<div style='color: #64748B; padding: 3px 0; text-decoration: line-through;'>{flag} {t}</div>")
-
-                    st.markdown(
-                        clean_html(f"""
-                        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
-                            <div style="font-size: 0.8rem; font-weight: 700; color: #10B981; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
-                                Group {grp}
-                            </div>
-                            {''.join(items_html)}
-                        </div>
-                        """),
-                        unsafe_allow_html=True,
-                    )
+                    with st.container(border=True):
+                        st.markdown(f"**Group {grp}**")
+                        for t in DEFAULT_GROUPS[grp]:
+                            flag = get_flag(t)
+                            if t == first:
+                                st.success(f"🥇 {flag} {t}")
+                            elif t == second:
+                                st.info(f"🥈 {flag} {t}")
+                            else:
+                                st.caption(f"❌ {flag} {t}")
 
             st.divider()
 
             # Knockout Bracket
-            st.markdown(
-                clean_html("""
-                <div style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin: 16px 0 16px 0;">
-                    ⚔️ Knockout Stage Progression
-                </div>
-                """),
-                unsafe_allow_html=True,
-            )
-
+            st.subheader("⚔️ Knockout Stage Progression")
             kn_cols = st.columns(4)
             r16 = res["r16"]
 
             with kn_cols[0]:
-                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Round of 16</div>"), unsafe_allow_html=True)
+                st.markdown("**ROUND OF 16**")
                 for i in range(0, len(r16), 2):
                     t1, t2 = r16[i], r16[i + 1]
                     winner = t1 if t1 in res["qf"] else t2
-                    c1 = "#10B981" if winner == t1 else "#64748B"
-                    c2 = "#10B981" if winner == t2 else "#64748B"
-                    w1_mark = "✔" if winner == t1 else ""
-                    w2_mark = "✔" if winner == t2 else ""
-                    st.markdown(
-                        clean_html(f"""
-                        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;">
-                            <div style="color: {c1}; font-weight: {'700' if winner==t1 else '500'}; display: flex; justify-content: space-between;">
-                                <span>{get_flag(t1)} {t1}</span><span>{w1_mark}</span>
-                            </div>
-                            <div style="color: {c2}; font-weight: {'700' if winner==t2 else '500'}; display: flex; justify-content: space-between; margin-top: 4px;">
-                                <span>{get_flag(t2)} {t2}</span><span>{w2_mark}</span>
-                            </div>
-                        </div>
-                        """),
-                        unsafe_allow_html=True,
-                    )
+                    with st.container(border=True):
+                        st.markdown(f"**{'🟢' if winner==t1 else '⚪'} {get_flag(t1)} {t1}**")
+                        st.markdown(f"**{'🟢' if winner==t2 else '⚪'} {get_flag(t2)} {t2}**")
 
             with kn_cols[1]:
-                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Quarter-Finals</div>"), unsafe_allow_html=True)
+                st.markdown("**QUARTER-FINALS**")
                 qf = res["qf"]
                 for i in range(0, len(qf), 2):
                     t1, t2 = qf[i], qf[i + 1]
                     winner = t1 if t1 in res["sf"] else t2
-                    c1 = "#10B981" if winner == t1 else "#64748B"
-                    c2 = "#10B981" if winner == t2 else "#64748B"
-                    w1_mark = "✔" if winner == t1 else ""
-                    w2_mark = "✔" if winner == t2 else ""
-                    st.markdown(
-                        clean_html(f"""
-                        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; margin-bottom: 24px;">
-                            <div style="color: {c1}; font-weight: {'700' if winner==t1 else '500'}; display: flex; justify-content: space-between;">
-                                <span>{get_flag(t1)} {t1}</span><span>{w1_mark}</span>
-                            </div>
-                            <div style="color: {c2}; font-weight: {'700' if winner==t2 else '500'}; display: flex; justify-content: space-between; margin-top: 6px;">
-                                <span>{get_flag(t2)} {t2}</span><span>{w2_mark}</span>
-                            </div>
-                        </div>
-                        """),
-                        unsafe_allow_html=True,
-                    )
+                    with st.container(border=True):
+                        st.markdown(f"**{'🟢' if winner==t1 else '⚪'} {get_flag(t1)} {t1}**")
+                        st.markdown(f"**{'🟢' if winner==t2 else '⚪'} {get_flag(t2)} {t2}**")
 
             with kn_cols[2]:
-                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 12px;'>Semi-Finals</div>"), unsafe_allow_html=True)
+                st.markdown("**SEMI-FINALS**")
                 sf = res["sf"]
                 for i in range(0, len(sf), 2):
                     t1, t2 = sf[i], sf[i + 1]
                     winner = t1 if t1 in res["final"] else t2
-                    c1 = "#10B981" if winner == t1 else "#64748B"
-                    c2 = "#10B981" if winner == t2 else "#64748B"
-                    w1_mark = "✔" if winner == t1 else ""
-                    w2_mark = "✔" if winner == t2 else ""
-                    st.markdown(
-                        clean_html(f"""
-                        <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; margin-bottom: 48px;">
-                            <div style="color: {c1}; font-weight: {'700' if winner==t1 else '500'}; display: flex; justify-content: space-between;">
-                                <span>{get_flag(t1)} {t1}</span><span>{w1_mark}</span>
-                            </div>
-                            <div style="color: {c2}; font-weight: {'700' if winner==t2 else '500'}; display: flex; justify-content: space-between; margin-top: 8px;">
-                                <span>{get_flag(t2)} {t2}</span><span>{w2_mark}</span>
-                            </div>
-                        </div>
-                        """),
-                        unsafe_allow_html=True,
-                    )
+                    with st.container(border=True):
+                        st.markdown(f"**{'🟢' if winner==t1 else '⚪'} {get_flag(t1)} {t1}**")
+                        st.markdown(f"**{'🟢' if winner==t2 else '⚪'} {get_flag(t2)} {t2}**")
 
             with kn_cols[3]:
-                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #F59E0B; text-transform: uppercase; margin-bottom: 12px;'>World Cup Final</div>"), unsafe_allow_html=True)
+                st.markdown("**WORLD CUP FINAL**")
                 t1, t2 = res["final"]
                 champ = res["champion"]
-                c1 = "#10B981" if champ == t1 else "#64748B"
-                c2 = "#10B981" if champ == t2 else "#64748B"
-                st.markdown(
-                    clean_html(f"""
-                    <div style="background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, #111827 100%); border: 1px solid rgba(245,158,11,0.35); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-                        <div style="color: {c1}; font-weight: {'800' if champ==t1 else '500'}; display: flex; justify-content: space-between; font-size: 1.05rem;">
-                            <span>{get_flag(t1)} {t1}</span><span>{'🏆' if champ==t1 else ''}</span>
-                        </div>
-                        <div style="color: {c2}; font-weight: {'800' if champ==t2 else '500'}; display: flex; justify-content: space-between; font-size: 1.05rem; margin-top: 8px;">
-                            <span>{get_flag(t2)} {t2}</span><span>{'🏆' if champ==t2 else ''}</span>
-                        </div>
-                    </div>
-                    """),
-                    unsafe_allow_html=True,
-                )
+                with st.container(border=True):
+                    st.markdown(f"### {'🏆' if champ==t1 else ''} {get_flag(t1)} {t1}")
+                    st.markdown(f"### {'🏆' if champ==t2 else ''} {get_flag(t2)} {t2}")
 
-                st.markdown(clean_html("<div style='font-size: 0.85rem; font-weight: 700; color: #D97706; text-transform: uppercase; margin-bottom: 8px;'>3rd Place Playoff</div>"), unsafe_allow_html=True)
-                st.markdown(
-                    clean_html(f"""
-                    <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px;">
-                        <div style="color: #F8FAFC; font-weight: 600;">🥉 {get_flag(res['third'])} {res['third']}</div>
-                    </div>
-                    """),
-                    unsafe_allow_html=True,
-                )
+                st.markdown("**3RD PLACE PLAYOFF**")
+                with st.container(border=True):
+                    st.markdown(f"🥉 **{get_flag(res['third'])} {res['third']}**")
 
     # ── Sub-tab 2: Monte Carlo Leaderboard ──
     with sub2:
-        st.markdown(
-            clean_html("""
-            <div style="color: #94A3B8; font-size: 0.92rem; margin-bottom: 16px;">
-                Aggregated stage advancement and championship probabilities derived from <strong>10,000 full Monte Carlo tournament simulations</strong>.
-            </div>
-            """),
-            unsafe_allow_html=True,
-        )
+        st.markdown("Aggregated stage advancement and championship probabilities derived from **10,000 full Monte Carlo tournament simulations**.")
 
         sim_csv = load_simulation_csv()
 
@@ -524,16 +407,7 @@ with tab2:
         display_df = st.session_state.get("sim_df", sim_csv)
 
         if display_df is not None:
-            # Championship Probability Bar Chart
-            st.markdown(
-                clean_html("""
-                <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
-                    🏆 Top 16 Championship Favorites
-                </div>
-                """),
-                unsafe_allow_html=True,
-            )
-
+            st.subheader("🏆 Top 16 Championship Favorites")
             top16 = display_df.head(16).copy()
             top16["formatted_team"] = top16["team"].apply(lambda t: f"{get_flag(t)} {t}")
 
@@ -564,16 +438,7 @@ with tab2:
             )
             st.plotly_chart(fig_bar, use_container_width=True)
 
-            # Stage Progression Heatmap
-            st.markdown(
-                clean_html("""
-                <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 28px 0 8px 0;">
-                    📊 Stage-by-Stage Progression Matrix (%)
-                </div>
-                """),
-                unsafe_allow_html=True,
-            )
-
+            st.subheader("📊 Stage-by-Stage Progression Matrix (%)")
             heatmap_cols = ["r16_pct", "qf_pct", "sf_pct", "final_pct", "champion_pct"]
             heatmap_df = display_df[["team"] + heatmap_cols].copy()
             heatmap_df["team"] = heatmap_df["team"].apply(lambda t: f"{get_flag(t)} {t}")
@@ -598,15 +463,7 @@ with tab2:
             )
             st.plotly_chart(fig_hm, use_container_width=True)
 
-            # Full Leaderboard Table
-            st.markdown(
-                clean_html("""
-                <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 24px 0 8px 0;">
-                    📋 Complete Tournament Leaderboard (All 32 Nations)
-                </div>
-                """),
-                unsafe_allow_html=True,
-            )
+            st.subheader("📋 Complete Tournament Leaderboard (All 32 Nations)")
             table_df = display_df.copy()
             table_df["Nation"] = table_df["team"].apply(lambda t: f"{get_flag(t)} {t}")
             table_df = table_df[[
@@ -624,14 +481,7 @@ with tab2:
 # TAB 3: Team Analytics & Historical Explorer
 # ═════════════════════════════════════════════════════════════════════════════
 with tab3:
-    st.markdown(
-        clean_html("""
-        <div style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 18px;">
-            Inspect historical Elo trajectory over football history (1872–2026) and analyze multidimensional radar attributes for international squads.
-        </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    st.markdown("Inspect historical Elo trajectory over football history (1872–2026) and analyze multidimensional radar attributes for international squads.")
 
     selected_teams = st.multiselect(
         "Select National Teams for Comparative Analysis",
@@ -644,16 +494,7 @@ with tab3:
     if not selected_teams:
         st.info("Please select at least one team from the dropdown above.")
     else:
-        # Elo Rating Progression Line Chart
-        st.markdown(
-            clean_html("""
-            <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
-                📈 Historical Elo Rating Progression
-            </div>
-            """),
-            unsafe_allow_html=True,
-        )
-
+        st.subheader("📈 Historical Elo Rating Progression")
         elo_filtered = elo_df[elo_df["team"].isin(selected_teams)].sort_values("date")
         fig_elo = px.line(
             elo_filtered,
@@ -678,16 +519,7 @@ with tab3:
 
         st.divider()
 
-        # Team Radar Profile (Current Season)
-        st.markdown(
-            clean_html("""
-            <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
-                🕸️ Squad Attribute Radar Profile (Current Season)
-            </div>
-            """),
-            unsafe_allow_html=True,
-        )
-
+        st.subheader("🕸️ Squad Attribute Radar Profile (Current Season)")
         radar_teams = [t for t in selected_teams if t in sim.team_profiles]
         if radar_teams:
             categories = ["Elo (Norm)", "Attack Index", "Defense Index", "Overall Squad", "Form Win Rate", "Form Goal Edge"]
@@ -739,16 +571,7 @@ with tab3:
 
         st.divider()
 
-        # Current Squad Metric Table
-        st.markdown(
-            clean_html("""
-            <div style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 18px 0 8px 0;">
-                📋 Current Squad Performance Specifications
-            </div>
-            """),
-            unsafe_allow_html=True,
-        )
-
+        st.subheader("📋 Current Squad Performance Specifications")
         stats_rows = []
         for team in selected_teams:
             prof = sim.team_profiles.get(team, {})
