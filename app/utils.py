@@ -20,6 +20,14 @@ sys.path.insert(0, str(BASE_DIR))
 
 from src.simulate_tournament import TournamentSimulator, DEFAULT_GROUPS
 
+import re
+
+def clean_html(html: str) -> str:
+    """Removes HTML comments, strips whitespace, and collapses newlines."""
+    html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
+    lines = [line.strip() for line in html.strip().splitlines() if line.strip()]
+    return "".join(lines)
+
 # ── Cached resource loaders ──────────────────────────────────────────────────
 
 @st.cache_resource(show_spinner="Initializing prediction engine…")

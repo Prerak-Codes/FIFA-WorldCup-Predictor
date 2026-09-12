@@ -28,9 +28,16 @@ from app.utils import (
     predict_matchup,
     prob_bar_chart,
 )
+import re
+
+def clean_html(html: str) -> str:
+    """Removes HTML comments, strips whitespace, and collapses newlines."""
+    html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
+    lines = [line.strip() for line in html.strip().splitlines() if line.strip()]
+    return "".join(lines)
+
 from app.components import (
     CSS_THEME,
-    clean_html,
     get_flag,
     get_team_label,
     render_sidebar_header,
