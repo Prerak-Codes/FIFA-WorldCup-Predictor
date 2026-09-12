@@ -130,7 +130,7 @@ def predict_matchup(
         p_draw = 0.5 * (probs[1] + probs2[1])
         p_away = 0.5 * (probs[2] + probs2[0])
         total = p_home + p_draw + p_away
-        return (p_home / total, p_draw / total, p_away / total)
+        return (float(p_home / total), float(p_draw / total), float(p_away / total))
 
     return (float(probs[0]), float(probs[1]), float(probs[2]))
 

@@ -1,1 +1,1 @@
-from app.components import clean_html
+"""FIFA World Cup Predictor app package."""

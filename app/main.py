@@ -180,6 +180,7 @@ with tab1:
             p_h, p_d, p_a = st.session_state["last_forecast"]["probs"]
 
     p_home, p_draw, p_away = st.session_state["last_forecast"]["probs"]
+    p_home, p_draw, p_away = float(p_home), float(p_draw), float(p_away)
 
     st.divider()
 
@@ -210,19 +211,19 @@ Model predicts **{away_team}** has a **{p_away:.1%}** win probability ({diff_pct
         with st.container(border=True):
             st.caption(f"{home_flag} {home_team.upper()} WIN")
             st.metric(label="Win Probability", value=f"{p_home:.1%}")
-            st.progress(min(max(p_home, 0.0), 1.0))
+            st.progress(float(min(max(p_home, 0.0), 1.0)))
 
     with col_p2:
         with st.container(border=True):
             st.caption("⚖️ DRAW OUTCOME")
             st.metric(label="Draw Probability", value=f"{p_draw:.1%}")
-            st.progress(min(max(p_draw, 0.0), 1.0))
+            st.progress(float(min(max(p_draw, 0.0), 1.0)))
 
     with col_p3:
         with st.container(border=True):
             st.caption(f"{away_flag} {away_team.upper()} WIN")
             st.metric(label="Win Probability", value=f"{p_away:.1%}")
-            st.progress(min(max(p_away, 0.0), 1.0))
+            st.progress(float(min(max(p_away, 0.0), 1.0)))
 
     # ── 3. Visual Probability Bar Chart ──
     st.plotly_chart(prob_bar_chart(home_team, away_team, p_home, p_draw, p_away), use_container_width=True)
