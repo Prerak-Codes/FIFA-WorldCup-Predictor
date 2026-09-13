@@ -17,13 +17,20 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Generated data
-data/interim/
+# Generated training data
 data/processed/
-data/predictions/
 
-# Trained models
+# Production data for deployment (keep interim clean files and predictions)
+data/interim/*
+!data/interim/elo_clean.csv
+!data/interim/match_features_clean.csv
+!data/interim/rankings_clean.csv
+!data/interim/results_clean.csv
+!data/predictions/*
+
+# Trained models (exclude heavy exploratory models, allow 1MB champion model)
 models/*.pkl
+!models/best_model.pkl
 models/*.joblib
 
 # Logs
