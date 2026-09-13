@@ -1,0 +1,55 @@
+export const COUNTRY_CODES = {
+  'Mexico': 'mx',
+  'Poland': 'pl',
+  'Nigeria': 'ng',
+  'Japan': 'jp',
+  'Canada': 'ca',
+  'Switzerland': 'ch',
+  'Colombia': 'co',
+  'South Korea': 'kr',
+  'Korea Republic': 'kr',
+  'United States': 'us',
+  'USA': 'us',
+  'Denmark': 'dk',
+  'Senegal': 'sn',
+  'Australia': 'au',
+  'Argentina': 'ar',
+  'Austria': 'at',
+  'Iran': 'ir',
+  'Ecuador': 'ec',
+  'France': 'fr',
+  'Serbia': 'rs',
+  'Peru': 'pe',
+  'Saudi Arabia': 'sa',
+  'Brazil': 'br',
+  'Ukraine': 'ua',
+  'Morocco': 'ma',
+  'Costa Rica': 'cr',
+  'England': 'gb-eng',
+  'Croatia': 'hr',
+  'Uruguay': 'uy',
+  'Ghana': 'gh',
+  'Spain': 'es',
+  'Netherlands': 'nl',
+  'Germany': 'de',
+  'Portugal': 'pt',
+  'Belgium': 'be',
+  'Italy': 'it',
+  'Sweden': 'se',
+  'Chile': 'cl',
+  'Algeria': 'dz',
+  'Cameroon': 'cm',
+  'Tunisia': 'tn',
+  'Egypt': 'eg',
+  'Qatar': 'qa',
+  'Wales': 'gb-wls',
+  'Scotland': 'gb-sct',
+}
+
+export function getFlagUrl(teamName) {
+  const code = COUNTRY_CODES[teamName]
+  if (code) {
+    return `https://flagcdn.com/w80/${code.toLowerCase()}.png`
+  }
+  return null
+}

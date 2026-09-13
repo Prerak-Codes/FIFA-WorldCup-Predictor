@@ -1,25 +1,26 @@
 # ⚽ FIFA World Cup Predictor — ML-Powered Match & Tournament Forecaster
 
-> Predict international match outcomes and simulate the FIFA World Cup using Machine Learning, Feature Engineering, and Monte Carlo Simulation.
+> Decoupled Full-Stack Machine Learning System predicting international match outcomes and simulating the 2026 FIFA World Cup using XGBoost, Monte Carlo Simulation, FastAPI, and React.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange?logo=scikitlearn)
+![FastAPI](https://img.shields.io/badge/FastAPI-REST_API-009688?logo=fastapi)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
 ![XGBoost](https://img.shields.io/badge/XGBoost-62.7%25_Accuracy-green)
-![LightGBM](https://img.shields.io/badge/LightGBM-0.8219_LogLoss-yellow)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.63-red?logo=streamlit)
 ![Tests](https://img.shields.io/badge/Tests-56%20passed-brightgreen)
-![Status](https://img.shields.io/badge/Status-Complete-success)
 
 ---
 
 ## 🏆 Project Overview
 
-This project builds a **complete end-to-end football prediction system** capable of:
+This project builds a **complete production-grade, decoupled full-stack sports analytics & prediction system**:
 
-- **Predicting international match outcomes** (Win / Draw / Loss probabilities)
-- **Simulating entire FIFA World Cup tournaments** from group stages to the final
-- **Estimating championship probability** for all 32 qualified nations via 10,000 Monte Carlo runs
-- **Serving predictions interactively** through a Streamlit dashboard
+- **Decoupled Architecture**: High-performance **FastAPI REST API** backend serving machine learning inference alongside a modern **React + Vite + Tailwind CSS** interactive frontend dashboard.
+- **Predicting International Match Outcomes**: Win / Draw / Loss calibrated probabilities computed using an ensemble XGBoost model trained on 49,500+ historical international matches (1872–2026).
+- **Simulating the 2026 FIFA World Cup**: Interactive tournament bracket simulation from group stages through knockout rounds to the final with extra time and penalty shootouts.
+- **10,000 Monte Carlo Simulations**: Statistical championship probability distributions for all 32 qualified nations.
+- **Interactive Team Analytics & Historical Elo Engine**: Historical Elo rating progression curves (1990–2026) and multi-attribute tactical comparisons.
 
 **Key results on the 2021–2026 holdout test set:**
 
@@ -33,52 +34,57 @@ This project builds a **complete end-to-end football prediction system** capable
 
 ---
 
-## 🗂️ Project Structure
+## 🗂️ Modern Decoupled Project Architecture
 
 ```text
 FIFA-WorldCup-Predictor/
 │
-├── app/                            # Streamlit web application
-│   ├── __init__.py
-│   ├── main.py                     # 3-tab interactive dashboard
-│   └── utils.py                    # Shared loaders, predictors, charts
+├── frontend/                       # Modern React + Vite + Tailwind CSS Dashboard
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.jsx          # Brand header, tabs, live API status
+│   │   │   ├── PredictorTab.jsx    # H2H selector, verdict, probability meters, stats
+│   │   │   ├── BracketSimulatorTab.jsx # Interactive bracket & Monte Carlo leaderboard
+│   │   │   └── AnalyticsTab.jsx    # Historical Elo charts (Recharts) & team metrics
+│   │   ├── services/
+│   │   │   └── api.js              # Frontend REST API client
+│   │   ├── utils/
+│   │   │   └── teams.js            # Country code mappings & flags
+│   │   ├── App.jsx                 # Master application controller
+│   │   └── main.jsx
+│   ├── package.json
+│   ├── vite.config.js
+│   └── Dockerfile                  # Multi-stage Nginx container build
+│
+├── backend/                        # High-Performance FastAPI REST Service
+│   ├── app/
+│   │   ├── routes/
+│   │   │   └── prediction.py       # REST endpoints (/predict, /simulate, /analytics)
+│   │   ├── services/
+│   │   │   └── predictor.py        # ML model runner & tournament simulator engine
+│   │   ├── schemas/
+│   │   │   └── prediction.py       # Pydantic request / response schemas
+│   │   └── main.py                 # FastAPI application & CORS configuration
+│   ├── models/
+│   │   └── best_model.pkl          # Serialized production XGBoost model
+│   ├── requirements.txt            # Backend service dependencies
+│   └── Dockerfile                  # FastAPI containerfile
+│
+├── docker-compose.yml              # One-command full-stack container orchestration
 │
 ├── data/
-│   ├── raw/                        # Original datasets (11 CSV files)
-│   │   ├── international_results/  # Results, goalscorers, shootouts
-│   │   ├── elo_ratings/            # Club Elo ratings
-│   │   ├── fifa_rankings/          # FIFA world rankings
-│   │   └── match_features/         # FIFA player attributes
-│   ├── interim/                    # Cleaned intermediate data
-│   └── processed/                  # Final training_data.csv (49,501 matches)
+│   ├── raw/                        # Original historical datasets (11 CSVs)
+│   ├── interim/                    # Cleaned intermediate Elo & match data
+│   ├── processed/                  # Final training_data.csv (49,501 matches)
+│   └── predictions/                # 10,000-run Monte Carlo simulation exports
 │
-├── models/                         # Serialized model checkpoints
-│   ├── best_model.pkl              # XGBoost (champion)
-│   ├── xgboost.pkl
-│   ├── lightgbm.pkl
-│   ├── random_forest.pkl
-│   └── logistic_regression.pkl
+├── src/                            # Model training & feature engineering pipelines
+│   ├── feature_engineering.py      # Temporal feature pipeline & leak prevention
+│   ├── train_model.py              # Multi-model training & checkpointing
+│   ├── evaluate_model.py           # Benchmark metrics & reporting
+│   └── simulate_tournament.py      # Standalone Monte Carlo tournament CLI
 │
-├── notebooks/                      # Jupyter analysis notebooks
-│   ├── 01–06_*.ipynb               # EDA, cleaning, merging
-│   ├── 07_feature_engineering.ipynb
-│   ├── 08_model_training.ipynb
-│   ├── 09_model_evaluation.ipynb
-│   └── 10_tournament_simulation.ipynb
-│
-├── reports/
-│   └── model_evaluation.json       # Benchmark metrics (all 5 models)
-│
-├── src/                            # Core Python modules
-│   ├── load_data.py                # Raw data loaders
-│   ├── clean_elo.py                # Elo data cleaning
-│   ├── feature_engineering.py      # Temporal feature pipeline
-│   ├── train_model.py              # Model training & checkpointing
-│   ├── evaluate_model.py           # Evaluation & reporting
-│   └── simulate_tournament.py      # Monte Carlo tournament engine
-│
-├── tests/                          # Automated test suite (56 tests)
-│   ├── conftest.py                 # Shared pytest fixtures
+├── tests/                          # Automated Pytest suite (56 tests)
 │   ├── test_load_data.py
 │   ├── test_feature_engineering.py
 │   ├── test_model.py
@@ -92,73 +98,58 @@ FIFA-WorldCup-Predictor/
 
 ## ⚡ Quick Start
 
-### 1. Clone & Install
+### Option 1: Docker Compose (Recommended)
 
-```powershell
-git clone https://github.com/Prerak-Codes/FIFA-WorldCup-Predictor.git
-cd FIFA-WorldCup-Predictor
+Run the entire full-stack application (FastAPI backend + React frontend) with a single command:
 
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-
-# Install dependencies
-pip install -r requirements.txt
+```bash
+docker compose up --build
 ```
 
-### 2. Launch the Interactive Dashboard
-
-```powershell
-.venv\Scripts\streamlit run app/main.py
-# Opens at http://localhost:8501
-```
-
-### 3. Run Simulations from CLI
-
-```powershell
-# Run 10,000 Monte Carlo simulations and export results
-.venv\Scripts\python src/simulate_tournament.py --simulations 10000 --seed 42
-
-# View results
-Get-Content data/predictions/world_cup_simulation_summary.csv | Select-Object -First 12
-```
-
-### 4. Re-train Models
-
-```powershell
-.venv\Scripts\python src/feature_engineering.py  # Rebuild training data
-.venv\Scripts\python src/train_model.py           # Train all 5 models
-.venv\Scripts\python src/evaluate_model.py        # Print benchmark table
-```
-
-### 5. Run Tests
-
-```powershell
-.venv\Scripts\python -m pytest tests/ -v
-# Expected: 56 passed in ~4 seconds
-```
+- **Frontend Dashboard**: Open [http://localhost:3000](http://localhost:3000)
+- **FastAPI Interactive Docs**: Open [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 🌐 Streamlit Dashboard
+### Option 2: Local Development
 
-Launch with `.venv\Scripts\streamlit run app/main.py`, then navigate to `http://localhost:8501`.
+#### 1. Start the FastAPI Backend
 
-### Tab 1 — 🆚 Head-to-Head Match Predictor
-- Choose any two of the 32 World Cup 2026 nations
-- Toggle **Neutral Venue** on/off
-- Select tournament type (World Cup / Euro / Copa / Friendly)
-- Instantly see **Win / Draw / Loss probabilities** as a colour-coded stacked bar
-- Compare both teams' Elo ratings, FIFA rank, attack, defense, and form
+```powershell
+# In root directory:
+.venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
 
-### Tab 2 — 🏆 World Cup Bracket Simulator
-- **Single Simulation**: Click one button to play out a full bracket — see group standings with 🥇/🥈/❌ and knockout rounds with green/grey highlights
-- **Monte Carlo Leaderboard**: Championship probability bar chart + stage progression heatmap for all 32 nations + full sortable table
+# Run FastAPI backend with hot-reload
+uvicorn backend.app.main:app --reload --port 8000
+```
+- API health check: [http://localhost:8000/health](http://localhost:8000/health)
+- Swagger Documentation: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### Tab 3 — 📊 Team Analytics Explorer
-- Select up to **8 teams** simultaneously
-- **Elo history line chart** spanning the full history of international football (270 nations)
-- **Radar/spider chart** comparing Attack, Defense, Overall, Form WR, and Elo across selected teams
+#### 2. Start the React Frontend
+
+```powershell
+# In a new terminal:
+cd frontend
+npm install
+npm run dev
+```
+- Interactive Frontend: [http://localhost:5173](http://localhost:5173)
+
+---
+
+## 📡 Backend REST API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Service health and version status |
+| `GET` | `/api/teams` | List of 32 qualified tournament nations |
+| `POST` | `/api/predict` | Predict single head-to-head match outcome & goal difference |
+| `POST` | `/api/simulate/single` | Run full tournament simulation (Groups -> Knockouts -> Champion) |
+| `GET` | `/api/simulate/leaderboard` | Retrieve 10,000 Monte Carlo simulation championship odds |
+| `POST` | `/api/simulate/monte-carlo` | Trigger custom Monte Carlo tournament run |
+| `GET` | `/api/analytics/elo-history` | Fetch historical Elo rating time series (1990–2026) |
+| `GET` | `/api/analytics/radar` | Fetch comparative team attack, defense, rank, and win rates |
 
 ---
 
@@ -200,49 +191,17 @@ Launch with `.venv\Scripts\streamlit run app/main.py`, then navigate to `http://
 
 ---
 
-## 🚀 Implementation Roadmap
+## 🧪 Automated Testing
 
-| Phase | Description | Status |
-|---|---|---|
-| **Phase 1** | Data pipeline fixes, Elo cleaning, `requirements.txt` | ✅ Complete |
-| **Phase 2** | Head-to-head features, FIFA squad features, `StandardScaler` | ✅ Complete |
-| **Phase 3** | Temporal validation split, sample weighting, model checkpoints | ✅ Complete |
-| **Phase 4** | XGBoost & LightGBM integration, hyperparameter tuning | ✅ Complete |
-| **Phase 5** | Monte Carlo simulation engine, prediction exports | ✅ Complete |
-| **Phase 6** | Streamlit interactive dashboard (3 tabs) | ✅ Complete |
-| **Phase 7** | Automated test suite (56 tests), README documentation | ✅ Complete |
+56 comprehensive automated tests verify data integrity, leak-free feature pipelines, calibrated inference, and simulation correctness:
 
----
-
-## 🧪 Tests
-
-56 automated tests across 4 modules:
-
-```
-tests/
-  test_load_data.py           — Raw CSV loader integrity (14 tests)
-  test_feature_engineering.py — Temporal ordering, no-leakage, feature validity (12 tests)
-  test_model.py               — Inference shape, probability calibration, batch API (8 tests)
-  test_simulation.py          — Group stage, knockout bracket, Monte Carlo correctness (22 tests)
-```
-
-Run with:
 ```powershell
 .venv\Scripts\python -m pytest tests/ -v
-```
-
----
-
-## 📦 Dependencies
-
-```
-pandas>=2.2.0        numpy>=1.26.0        scikit-learn>=1.4.0
-xgboost>=2.0.0       lightgbm>=4.0.0      plotly>=5.20.0
-streamlit>=1.35.0    pytest>=8.0.0        scipy>=1.12.0
+# Output: 56 passed in ~3.5 seconds
 ```
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License &mdash; see [LICENSE](LICENSE) for details.
