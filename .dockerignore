@@ -1,0 +1,46 @@
+# Git & Version Control
+.git
+.gitignore
+
+# Virtual Environments & Packages
+.venv
+venv
+env
+ENV
+
+# Python Caches & Bytecode
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache
+
+# Node & Frontend Assets
+node_modules
+frontend/node_modules
+frontend/dist
+dist
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Jupyter & Notebooks
+.ipynb_checkpoints
+notebooks
+
+# IDEs & OS Metadata
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Documentation & Prompt Artifacts
+*Agent_Prompt*.md
+
+# Logs & Temporary Files
+*.log
+scratch

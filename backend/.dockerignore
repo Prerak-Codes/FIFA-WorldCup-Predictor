@@ -1,0 +1,20 @@
+# Git
+.git
+.gitignore
+
+# Python Environments & Caches
+.venv
+venv
+env
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache
+
+# OS & IDE
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.log
